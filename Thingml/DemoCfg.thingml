@@ -1,4 +1,4 @@
-import "../VPS/Backbone_IRPS.thingml"
+import "Demo.thingml"
 
 import "../VPS/IR-Reader/PulseReader.thingml"
 import "../VPS/IR-Reader/PackageReader.thingml"
@@ -10,7 +10,9 @@ configuration Demo_VPS
 @teensy_corepath 		"../../../../../VPS/c/lib/core/teensy3"
 @teensy_externpath 		"../../../../../VPS/c/utils"
 @teensy_libpath 		"../../../../../VPS/c/lib/Adafruit_NeoPixel"
-@teensy_fifosize "512"
+@teensy_libpath			"../modules/Adafruit_GFX-Library"
+@teensy_libpath			"../modules/Adafruit_ST7735-Library"
+@teensy_fifosize 		"512"
 {   
 	/* Begin Communication configuration */
 	instance button : Button
@@ -29,6 +31,7 @@ configuration Demo_VPS
 	instance calibrationStorer : CalibrationStorer
 	instance storer : Storer
 	instance calibrationValidator : CalibrationValidator
+
 	
 	// Buttons and serial
 	connector softButton.Button => button.evt
@@ -65,4 +68,10 @@ configuration Demo_VPS
 	connector calibrationStorer.storeReader => storer.reader
     connector backbone.validator => calibrationValidator.validator
     
+
+	
+	instance demo : Demo
+	
+	connector demo.ext => backbone.Output
+
 }
