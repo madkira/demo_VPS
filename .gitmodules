@@ -4,3 +4,6 @@
 [submodule "modules/Adafruit_GFX-Library"]
 	path = modules/Adafruit_GFX-Library
 	url = https://github.com/adafruit/Adafruit-GFX-Library.git
+[submodule "VPS"]
+	path = VPS
+	url = https://github.com/SINTEF-9012/vive-position-sensor.git
