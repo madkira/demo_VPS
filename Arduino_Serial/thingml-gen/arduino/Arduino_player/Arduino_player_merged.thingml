@@ -1,0 +1,216 @@
+thing fragment OutputMessage {
+	message positionsend(x : UInt32, y : UInt32, z : UInt32)
+	@code "1"
+	message noSignal()
+	@code "2"
+}
+thing Demo includes OutputMessage , TimerMsgs @c_header "
+#include <Adafruit_ST7735.h>
+#include <Adafruit_GFX.h>
+" @c_global "
+#define TFT_CS     10
+#define TFT_RST    9
+#define TFT_DC     8
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
+
+#define TFT_SCLK 13   // set these to be whatever pins you like!
+#define TFT_MOSI 11   // set these to be whatever pins you like!
+//Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+
+#define DOT 2
+#define CIRCLE 4
+
+uint8_t old_x;
+uint8_t old_y;
+
+uint8_t cur_x;
+uint8_t cur_y;
+
+uint8_t tar_x;
+uint8_t tar_y;
+
+uint8_t Score = 0;
+
+" {
+	required port Output {
+		receives positionsend receives noSignal
+	}
+	required port Timer {
+		sends timer_start sends timer_cancel receives timer_timeout
+	}
+	internal port process {
+	}
+	statechart Demo_Reach_Zone init Idle {
+		on entry do
+		'
+			tft.initR(INITR_144GREENTAB);
+  			tft.setRotation(3);
+			tft.fillScreen(ST7735_BLACK);
+			'
+		end
+		state Idle {
+			on entry do
+			'
+			Score = 0;
+			tft.fillScreen(ST7735_BLACK);
+		    tar_x = 64;
+		    tar_y = 64;
+			'
+			end
+			internal
+			event m : Output?noSignal
+			action 'tft.fillCircle(cur_x, cur_y, DOT, ST7735_RED);'
+			internal
+			event m : Output?positionsend
+			action '
+				old_x = cur_x;
+				old_y = cur_y;
+				cur_y = int(' & m.x & '/1000);
+				cur_x = int(' & m.y & '/1000);
+				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
+			    tft.setCursor(0, 30);
+		    	tft.setTextColor(ST7735_RED);
+		    	tft.setTextSize(1);
+		    	tft.println("Reach the center to Start");
+			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
+				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
+				'
+			transition -> SetPoint guard '(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE'
+			action Timer!timer_start(0, 30000)
+		}
+		state SetPoint {
+			on entry do
+			'
+			tft.fillScreen(ST7735_BLACK);
+			old_x = 0;
+			old_y = 0;
+			cur_x = 0;
+			cur_y = 0;
+			tar_x = random(128);
+			tar_y = random(128);
+			'
+			end
+			internal
+			event m : Output?positionsend
+			action '
+				old_x = cur_x;
+				old_y = cur_y;
+				cur_y = int(' & m.x & '/1000);
+				cur_x = int(' & m.y & '/1000);
+				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
+			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
+				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
+				'
+			internal
+			event m : Output?noSignal
+			action 'tft.fillCircle(cur_x, cur_y, DOT, ST7735_RED);'
+			transition -> SetPoint guard '(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE'
+			action 'Score++;'
+			transition -> GameOver
+			event Timer?timer_timeout
+		}
+		state GameOver {
+			on entry do
+			'
+				tft.fillScreen(ST7735_BLACK);
+			    tft.setCursor(40, 30);
+			    tft.setTextColor(ST7735_RED);
+			    tft.setTextSize(1);
+			    tft.println("Game Over");
+			    tft.setTextColor(ST7735_YELLOW);
+			    tft.setCursor(60, 50);
+			    tft.setTextSize(4);
+			    tft.println(Score);
+				'
+				Timer!timer_start(0, 5000)
+			end
+			transition -> Idle
+			event Timer?timer_timeout
+		}
+	}
+}
+datatype Char<1>
+	@type_checker "Integer"
+	@c_type "char"
+	@c_byte_size "1"
+object String
+	@type_checker "String"
+	@c_type "char *"
+	@c_byte_size "2"
+datatype Boolean<1>
+	@type_checker "Boolean"
+	@c_type "uint8_t"
+	@c_byte_size "1"
+datatype UInt8<1>
+	@type_checker "Integer"
+	@c_type "uint8_t"
+	@c_byte_size "1"
+datatype UInt16<2>
+	@type_checker "Integer"
+	@c_type "uint16_t"
+	@c_byte_size "2"
+	@java_type "int"
+	@java_primitive "true"
+datatype Int16<2>
+	@type_checker "Integer"
+	@c_type "int16_t"
+	@c_byte_size "2"
+datatype UInt32<4>
+	@type_checker "Integer"
+	@c_type "uint32_t"
+	@c_byte_size "4"
+datatype Integer<2>
+	@type_checker "Integer"
+	@c_type "int16_t"
+	@c_byte_size "2"
+datatype Long<4>
+	@type_checker "Integer"
+	@c_type "long"
+	@c_byte_size "4"
+datatype Float<4>
+	@type_checker "Real"
+	@c_type "float"
+	@c_byte_size "4"
+enumeration DigitalState
+	@c_byte_size "1"
+	@c_type "uint8_t"
+	{
+	LOW @enum_val "0"
+	HIGH @enum_val "1"
+}
+datatype Byte<1>
+	@type_checker "Integer"
+	@c_type "uint8_t"
+	@c_byte_size "1"
+	@java_type "byte"
+	@java_primitive "true"
+	@scala_type "Byte"
+	@SenML_type "Double"
+enumeration DigitalState
+	@c_type "uint8_t"
+	@c_byte_size "1"
+	{
+	LOW @enum_val "0"
+	HIGH @enum_val "1"
+}
+datatype Double<8>
+	@type_checker "Real"
+	@c_type "double"
+	@c_byte_size "8"
+thing fragment TimerMsgs {
+	message timer_start(id : UInt8, time : UInt32)
+	@timer_start "true" message timer_cancel(id : UInt8)
+	@timer_cancel "true" message timer_timeout(id : UInt8)
+	@timeout "true"
+	message ms8_tic()
+	@xms_tic "8"
+}
+protocol Serial @serializer "binary" ;
+
+protocol Timer ;
+
+configuration Arduino_player {
+	instance player : Demo
+	connector player.Output over Serial
+	connector player.Timer over Timer
+}

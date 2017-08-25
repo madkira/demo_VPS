@@ -1,0 +1,82 @@
+import "../VPS/thingml/Backbone_IRPS.thingml"
+import "../VPS/thingml/Communication.thingml"
+import "../VPS/thingml/CalibrationValidator.thingml"
+
+thing Demo includes OutputMessage, SoftButtonMsgs, eCalibrationValidator
+@c_header "
+#include <Adafruit_ST7735.h>
+"
+
+@c_global "
+#define TFT_CS     10
+#define TFT_RST    9
+#define TFT_DC     8
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
+
+#define TFT_SCLK 13   // set these to be whatever pins you like!
+#define TFT_MOSI 11   // set these to be whatever pins you like!
+//Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+
+
+#define DOT 2
+#define CIRCLE 4
+
+uint8_t old_x;
+uint8_t old_y;
+
+uint8_t cur_x;
+uint8_t cur_y;
+
+uint8_t tar_x;
+uint8_t tar_y;
+
+"
+{
+	required port ext{
+		receives positionCoordinates, endvalidate, long_press
+	}
+	
+	
+	statechart Demo_Reach_Zone init Idle{
+		on entry do
+			'
+			tft.initR(INITR_144GREENTAB);
+			tft.fillScreen(ST7735_BLACK);
+			'
+		end
+		state Idle{
+			transition -> SetPoint event m: ext?endvalidate
+		}
+		
+		state SetPoint{
+			on entry do
+			'
+			tft.fillScreen(ST7735_BLACK);
+			old_x = 0;
+			old_y = 0;
+			cur_x = 0;
+			cur_y = 0;
+			tar_x = random()%128;
+			tar_y = random()%128;
+			'
+			end
+			transition -> game event m: ext?positionCoordinates action 'cur_x = '&m.x&'*100; cur_y = '&m.y&';'
+			transition -> Idle event m: ext?long_press
+		}
+		
+		state game {
+			on entry do
+			'
+				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
+			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
+				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
+			'
+			
+			end
+			
+			transition -> game event m: ext?positionCoordinates action 'old_x = cur_x; old_y = cur_y; cur_x = '&m.x&'*100; cur_y = '&m.y&';'
+			transition -> Idle event m: ext?long_press
+		}
+	}
+	
+}

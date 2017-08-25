@@ -1,0 +1,108 @@
+
+import "../../VPS/thingml/Backbone_IRPS.thingml"
+import "../../VPS/thingml/IR-Reader/PulseReader.thingml"
+import "../../VPS/thingml/IR-Reader/PackageReader.thingml"
+import "../../VPS/thingml/IR-Reader/AngleReader.thingml"
+import "../../VPS/thingml/Runner.thingml"
+import "../../VPS/thingml/Calibrator.thingml"
+
+thing fragment aze
+{
+	message positionsend(x : UInt32, y : UInt32, z : UInt32) @code "1"
+	message noSignal() @code "2"
+}
+
+thing Demo includes aze, OutputMessage
+{
+	required port op{
+		receives positionCoordinates, nothing
+	}
+	
+	provided port serial1sender
+	{
+		sends positionsend, noSignal
+	}
+	
+	statechart alpha init Idle{
+		state Idle{
+			internal event m: op?positionCoordinates action do 
+					'
+					uint32_t px = (int)('&m.x&'*100000);
+					uint32_t py = (int)('&m.y&'*100000);
+					uint32_t pz = (int)('&m.z&'*100000);
+					'
+					serial1sender!positionsend('px','py','pz') end
+			internal event m: op?nothing action serial1sender!noSignal()
+		}
+	}
+}
+
+
+protocol Serial1
+@serializer "binary";
+
+
+configuration Demo_VPS
+@teensy_corepath 		"../../../../VPS/c/lib/core/teensy3"
+@teensy_externpath 		"../../../../VPS/c/utils"
+@teensy_libpath 		"../../../../VPS/c/lib/Adafruit_NeoPixel"
+@teensy_fifosize "512"
+{   
+	/* Begin Communication configuration */
+	instance button : Button
+	instance softButton : SoftButton
+	instance blinker : Blinker
+	instance serial : SerialOut
+    instance serialIn: SerialIn
+    
+	instance pulseReader : PulseReader
+	instance packageReader : PackageReader
+	instance angleReader : AngleReader
+
+	instance backbone : Backbone
+	instance runner : Runner
+	instance calibrator : Calibrator
+	instance calibrationStorer : CalibrationStorer
+	instance storer : Storer
+	instance calibrationValidator : CalibrationValidator
+	
+	// Buttons and serial
+	connector softButton.Button => button.evt
+	connector backbone.presser => softButton.SoftButton
+	connector backbone.printer => serial.basic
+	connector backbone.serialRead => serialIn.serialcall
+	
+	
+	// Status messages
+
+    connector backbone.StatusHandler => packageReader.StatusSender 
+    connector backbone.StatusHandler => angleReader.StatusSender 
+    connector backbone.StatusHandler => calibrator.StatusSender 
+    connector backbone.StatusHandler => runner.StatusSender 
+    
+    connector backbone.pixel => blinker.neopixel
+    
+    
+    // Reading and converting signal-information 
+    connector pulseReader.PulseSender => packageReader.PulseReceiver
+    connector packageReader.PackageSender => angleReader.PackageReceiver
+	connector backbone.AngleReceiver => angleReader.AngleSender
+	connector pulseReader.OverflowNotifier => angleReader.OverflowNotifier
+	
+	// Runner
+    connector backbone.Run => runner.Run
+	
+	// Calibrator
+	connector backbone.calibrator => calibrator.calibrator
+	
+	// Storing and validating calibration 
+	connector backbone.CalibrationStorer => calibrationStorer.storer
+	connector calibrationStorer.storeWriter => storer.writer
+	connector calibrationStorer.storeReader => storer.reader
+    connector backbone.validator => calibrationValidator.validator
+
+	instance demo : Demo
+	connector demo.op => backbone.Output
+	connector demo.serial1sender over Serial1
+
+}
