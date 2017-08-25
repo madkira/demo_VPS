@@ -104,7 +104,40 @@ void Serial1_read() {
   
 }
 
-/*FORWARDERS*/// Forwarding of messages Serial1::Demo::serial1sender::positionsend
+/*FORWARDERS*/// Forwarding of messages Serial1::Demo::serial1sender::calibrating
+void forward_Serial1_Demo_send_serial1sender_calibrating(struct Demo_Instance *_instance){
+byte forward_buf[2];
+forward_buf[0] = (3 >> 8) & 0xFF;
+forward_buf[1] =  3 & 0xFF;
+
+
+//Forwarding with specified function 
+Serial1_forwardMessage(forward_buf, 2);
+}
+
+// Forwarding of messages Serial1::Demo::serial1sender::noSignal
+void forward_Serial1_Demo_send_serial1sender_noSignal(struct Demo_Instance *_instance){
+byte forward_buf[2];
+forward_buf[0] = (2 >> 8) & 0xFF;
+forward_buf[1] =  2 & 0xFF;
+
+
+//Forwarding with specified function 
+Serial1_forwardMessage(forward_buf, 2);
+}
+
+// Forwarding of messages Serial1::Demo::serial1sender::play
+void forward_Serial1_Demo_send_serial1sender_play(struct Demo_Instance *_instance){
+byte forward_buf[2];
+forward_buf[0] = (4 >> 8) & 0xFF;
+forward_buf[1] =  4 & 0xFF;
+
+
+//Forwarding with specified function 
+Serial1_forwardMessage(forward_buf, 2);
+}
+
+// Forwarding of messages Serial1::Demo::serial1sender::positionsend
 void forward_Serial1_Demo_send_serial1sender_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z){
 byte forward_buf[14];
 forward_buf[0] = (1 >> 8) & 0xFF;
@@ -146,16 +179,5 @@ forward_buf[13] =  (u_z.bytebuffer[0] & 0xFF);
 
 //Forwarding with specified function 
 Serial1_forwardMessage(forward_buf, 14);
-}
-
-// Forwarding of messages Serial1::Demo::serial1sender::noSignal
-void forward_Serial1_Demo_send_serial1sender_noSignal(struct Demo_Instance *_instance){
-byte forward_buf[2];
-forward_buf[0] = (2 >> 8) & 0xFF;
-forward_buf[1] =  2 & 0xFF;
-
-
-//Forwarding with specified function 
-Serial1_forwardMessage(forward_buf, 2);
 }
 

@@ -21,8 +21,8 @@ int SerialOut_Message_State;
 int SerialOut_handle_empty_event(struct SerialOut_Instance *_instance);
 // Declaration of prototypes outgoing messages :
 void SerialOut_Message_OnEntry(int state, struct SerialOut_Instance *_instance);
-void SerialOut_handle_basic_printOperationState(struct SerialOut_Instance *_instance, uint8_t id, uint8_t verbose);
 void SerialOut_handle_basic_printPoint(struct SerialOut_Instance *_instance, double x, double y, double z, double separation, uint8_t verbose);
+void SerialOut_handle_basic_printOperationState(struct SerialOut_Instance *_instance, uint8_t id, uint8_t verbose);
 void SerialOut_handle_basic_printStatus(struct SerialOut_Instance *_instance, uint8_t id, uint8_t verbose);
 // Declaration of callbacks for incoming messages:
 

@@ -165,6 +165,102 @@ default: break;
 }
 
 // Event Handlers for incoming messages:
+void Calibrator_handle_calibrator_receiveAngles(struct Calibrator_Instance *_instance, double bh, double bv, double ch, double cv) {
+if(!(_instance->active)) return;
+//Region Calibrator
+uint8_t Calibrator_Calibrator_State_event_consumed = 0;
+if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE) {
+if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
+
+                // Only collect data-points whena all have been refreshed
+                if (++fourCounter == 4) {
+                    fourCounter = 0;
+                    
+                    angleValues[angleIndex][0] = bh;
+                    angleValues[angleIndex][1] = bv;
+                    angleValues[angleIndex][2] = ch;
+                    angleValues[angleIndex][3] = cv;
+                    angleIndex++;
+                }
+                
+                if (angleIndex == CALIBRATION_POINT_COLLECTION_COUNT) {
+                    angleIndex = 0;
+Calibrator_send_avt_calibrating(_instance);
+}
+Calibrator_Calibrator_State_event_consumed = 1;
+}
+}
+//End Region Calibrator
+//End dsregion Calibrator
+//Session list: 
+}
+void Calibrator_handle_calibrator_entrypoint(struct Calibrator_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Calibrator
+uint8_t Calibrator_Calibrator_State_event_consumed = 0;
+if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_CALIBRATE_STATE) {
+if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
+Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
+_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE;
+Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE, _instance);
+Calibrator_Calibrator_State_event_consumed = 1;
+}
+}
+//End Region Calibrator
+//End dsregion Calibrator
+//Session list: 
+}
+void Calibrator_handle_calibrator_calibrate(struct Calibrator_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Calibrator
+uint8_t Calibrator_Calibrator_State_event_consumed = 0;
+if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_IDLE_STATE) {
+if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
+Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_IDLE_STATE, _instance);
+_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_CALIBRATE_STATE;
+Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
+Calibrator_Calibrator_State_event_consumed = 1;
+}
+}
+else if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_CALIBRATE_STATE) {
+if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
+Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
+_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_CALIBRATE_STATE;
+restartCalibration();
+Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
+Calibrator_Calibrator_State_event_consumed = 1;
+}
+}
+else if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE) {
+if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
+Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE, _instance);
+_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_CALIBRATE_STATE;
+restartCalibration();
+Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
+Calibrator_Calibrator_State_event_consumed = 1;
+}
+}
+//End Region Calibrator
+//End dsregion Calibrator
+//Session list: 
+}
+void Calibrator_handle_avt_calibrationFailed(struct Calibrator_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Calibrator
+uint8_t Calibrator_Calibrator_State_event_consumed = 0;
+if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_CALIBRATE_STATE) {
+if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
+Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
+_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_IDLE_STATE;
+Calibrator_send_calibrator_errcalibrate(_instance);
+Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_IDLE_STATE, _instance);
+Calibrator_Calibrator_State_event_consumed = 1;
+}
+}
+//End Region Calibrator
+//End dsregion Calibrator
+//Session list: 
+}
 void Calibrator_handle_avt_calibrating(struct Calibrator_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Calibrator
@@ -224,23 +320,6 @@ Calibrator_Calibrator_State_event_consumed = 1;
 //End dsregion Calibrator
 //Session list: 
 }
-void Calibrator_handle_avt_calibrationFailed(struct Calibrator_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Calibrator
-uint8_t Calibrator_Calibrator_State_event_consumed = 0;
-if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_CALIBRATE_STATE) {
-if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
-Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
-_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_IDLE_STATE;
-Calibrator_send_calibrator_errcalibrate(_instance);
-Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_IDLE_STATE, _instance);
-Calibrator_Calibrator_State_event_consumed = 1;
-}
-}
-//End Region Calibrator
-//End dsregion Calibrator
-//Session list: 
-}
 void Calibrator_handle_avt_calibrationComplete(struct Calibrator_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Calibrator
@@ -251,85 +330,6 @@ Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
 _instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_IDLE_STATE;
 Calibrator_send_calibrator_endcalibrate(_instance);
 Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_IDLE_STATE, _instance);
-Calibrator_Calibrator_State_event_consumed = 1;
-}
-}
-//End Region Calibrator
-//End dsregion Calibrator
-//Session list: 
-}
-void Calibrator_handle_calibrator_calibrate(struct Calibrator_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Calibrator
-uint8_t Calibrator_Calibrator_State_event_consumed = 0;
-if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_IDLE_STATE) {
-if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
-Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_IDLE_STATE, _instance);
-_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_CALIBRATE_STATE;
-Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
-Calibrator_Calibrator_State_event_consumed = 1;
-}
-}
-else if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_CALIBRATE_STATE) {
-if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
-Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
-_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_CALIBRATE_STATE;
-restartCalibration();
-Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
-Calibrator_Calibrator_State_event_consumed = 1;
-}
-}
-else if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE) {
-if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
-Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE, _instance);
-_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_CALIBRATE_STATE;
-restartCalibration();
-Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
-Calibrator_Calibrator_State_event_consumed = 1;
-}
-}
-//End Region Calibrator
-//End dsregion Calibrator
-//Session list: 
-}
-void Calibrator_handle_calibrator_entrypoint(struct Calibrator_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Calibrator
-uint8_t Calibrator_Calibrator_State_event_consumed = 0;
-if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_CALIBRATE_STATE) {
-if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
-Calibrator_Calibrator_OnExit(CALIBRATOR_CALIBRATOR_CALIBRATE_STATE, _instance);
-_instance->Calibrator_Calibrator_State = CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE;
-Calibrator_Calibrator_OnEntry(CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE, _instance);
-Calibrator_Calibrator_State_event_consumed = 1;
-}
-}
-//End Region Calibrator
-//End dsregion Calibrator
-//Session list: 
-}
-void Calibrator_handle_calibrator_receiveAngles(struct Calibrator_Instance *_instance, double bh, double bv, double ch, double cv) {
-if(!(_instance->active)) return;
-//Region Calibrator
-uint8_t Calibrator_Calibrator_State_event_consumed = 0;
-if (_instance->Calibrator_Calibrator_State == CALIBRATOR_CALIBRATOR_POINTCOLLECT_STATE) {
-if (Calibrator_Calibrator_State_event_consumed == 0 && 1) {
-
-                // Only collect data-points whena all have been refreshed
-                if (++fourCounter == 4) {
-                    fourCounter = 0;
-                    
-                    angleValues[angleIndex][0] = bh;
-                    angleValues[angleIndex][1] = bv;
-                    angleValues[angleIndex][2] = ch;
-                    angleValues[angleIndex][3] = cv;
-                    angleIndex++;
-                }
-                
-                if (angleIndex == CALIBRATION_POINT_COLLECTION_COUNT) {
-                    angleIndex = 0;
-Calibrator_send_avt_calibrating(_instance);
-}
 Calibrator_Calibrator_State_event_consumed = 1;
 }
 }

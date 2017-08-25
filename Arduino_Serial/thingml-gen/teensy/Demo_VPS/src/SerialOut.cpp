@@ -42,33 +42,6 @@ default: break;
 }
 
 // Event Handlers for incoming messages:
-void SerialOut_handle_basic_printOperationState(struct SerialOut_Instance *_instance, uint8_t id, uint8_t verbose) {
-if(!(_instance->active)) return;
-//Region Message
-uint8_t SerialOut_Message_State_event_consumed = 0;
-if (_instance->SerialOut_Message_State == SERIALOUT_MESSAGE_IDLE_STATE) {
-if (SerialOut_Message_State_event_consumed == 0 && 1) {
-if(verbose) {
-
-                    Serial.print("\nI,");
-                    Serial.print(id);
-                    Serial.print(",");
-                
-
-} else {
-
-                    Serial.print("\nState:\t");
-                    Serial.print(id);
-                
-
-}
-SerialOut_Message_State_event_consumed = 1;
-}
-}
-//End Region Message
-//End dsregion Message
-//Session list: 
-}
 void SerialOut_handle_basic_printPoint(struct SerialOut_Instance *_instance, double x, double y, double z, double separation, uint8_t verbose) {
 if(!(_instance->active)) return;
 //Region Message
@@ -99,6 +72,33 @@ if(verbose) {
                     Serial.print(",\t"); 
                     Serial.print(separation,4);
     		    
+
+}
+SerialOut_Message_State_event_consumed = 1;
+}
+}
+//End Region Message
+//End dsregion Message
+//Session list: 
+}
+void SerialOut_handle_basic_printOperationState(struct SerialOut_Instance *_instance, uint8_t id, uint8_t verbose) {
+if(!(_instance->active)) return;
+//Region Message
+uint8_t SerialOut_Message_State_event_consumed = 0;
+if (_instance->SerialOut_Message_State == SERIALOUT_MESSAGE_IDLE_STATE) {
+if (SerialOut_Message_State_event_consumed == 0 && 1) {
+if(verbose) {
+
+                    Serial.print("\nI,");
+                    Serial.print(id);
+                    Serial.print(",");
+                
+
+} else {
+
+                    Serial.print("\nState:\t");
+                    Serial.print(id);
+                
 
 }
 SerialOut_Message_State_event_consumed = 1;

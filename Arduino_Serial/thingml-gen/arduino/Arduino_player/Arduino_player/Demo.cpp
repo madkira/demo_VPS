@@ -29,6 +29,8 @@ uint8_t tar_y;
 
 uint8_t Score = 0;
 
+uint8_t timer = 30;
+
 
 // END: Code from the c_global annotation Demo
 
@@ -63,30 +65,46 @@ case DEMO_DEMO_REACH_ZONE_IDLE_STATE:{
 			tft.fillScreen(ST7735_BLACK);
 		    tar_x = 64;
 		    tar_y = 64;
+			timer = 30;
+			
+break;
+}
+case DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE:{
+
+			tft.fillScreen(ST7735_BLACK);
+			tft.setCursor(5, 5);
+			    tft.setTextColor(ST7735_YELLOW);
+			    tft.setTextSize(2);
+			    tft.println("Calibration");
 			
 break;
 }
 case DEMO_DEMO_REACH_ZONE_SETPOINT_STATE:{
 
 			tft.fillScreen(ST7735_BLACK);
+			tft.setCursor(100,0);
+			tft.println(Score);
+			tft.drawRect(1, 1, timer*3, 2, ST7735_RED);
 			old_x = 0;
 			old_y = 0;
 			cur_x = 0;
 			cur_y = 0;
-			tar_x = random(128);
-			tar_y = random(128);
+			tar_x = 5 + random(110);
+			tar_y = 5 + random(110);
 			
 break;
 }
 case DEMO_DEMO_REACH_ZONE_GAMEOVER_STATE:{
 
 				tft.fillScreen(ST7735_BLACK);
-			    tft.setCursor(40, 30);
-			    tft.setTextColor(ST7735_RED);
-			    tft.setTextSize(1);
-			    tft.println("Game Over");
+			    tft.setCursor(30, 5);
 			    tft.setTextColor(ST7735_YELLOW);
-			    tft.setCursor(60, 50);
+			    tft.setTextSize(3);
+			    tft.println("Game\n");
+			    tft.setCursor(30, 35);
+			    tft.println("Over");
+			    tft.setTextColor(ST7735_GREEN);
+			    tft.setCursor(50, 70);
 			    tft.setTextSize(4);
 			    tft.println(Score);
 				
@@ -104,6 +122,8 @@ case DEMO_DEMO_REACH_ZONE_STATE:{
 Demo_Demo_Reach_Zone_OnExit(_instance->Demo_Demo_Reach_Zone_State, _instance);
 break;}
 case DEMO_DEMO_REACH_ZONE_IDLE_STATE:{
+break;}
+case DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE:{
 break;}
 case DEMO_DEMO_REACH_ZONE_SETPOINT_STATE:{
 break;}
@@ -138,6 +158,23 @@ Demo_Demo_Reach_Zone_State_event_consumed = 1;
 //End dsregion Demo_Reach_Zone
 //Session list: 
 }
+void Demo_handle_Timer_s1_tic(struct Demo_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Demo_Reach_Zone
+uint8_t Demo_Demo_Reach_Zone_State_event_consumed = 0;
+if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_SETPOINT_STATE) {
+if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
+
+			tft.drawRect(1, 1, timer*3, 2, ST7735_BLACK);
+			timer--;
+			tft.drawRect(1, 1, timer*3, 2, ST7735_RED);
+Demo_Demo_Reach_Zone_State_event_consumed = 1;
+}
+}
+//End Region Demo_Reach_Zone
+//End dsregion Demo_Reach_Zone
+//Session list: 
+}
 void Demo_handle_Output_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z) {
 if(!(_instance->active)) return;
 //Region Demo_Reach_Zone
@@ -147,13 +184,14 @@ if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
 
 				old_x = cur_x;
 				old_y = cur_y;
-				cur_y = int(x/1000);
-				cur_x = int(y/1000);
+				cur_x = int(x/1000);
+				cur_y =128 -  int(y/1000);
 				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
 			    tft.setCursor(0, 30);
-		    	tft.setTextColor(ST7735_RED);
+		    	tft.setTextColor(ST7735_YELLOW);
 		    	tft.setTextSize(1);
-		    	tft.println("Reach the center to Start");
+		    	tft.println("   Reach the center");
+		    	tft.println("      to Start");
 			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
 				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
 				
@@ -165,12 +203,44 @@ if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
 
 				old_x = cur_x;
 				old_y = cur_y;
-				cur_y = int(x/1000);
-				cur_x = int(y/1000);
+				cur_x = int(x/1000);
+				cur_y = 128 - int(y/1000);
 				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
 			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
 				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
 				
+Demo_Demo_Reach_Zone_State_event_consumed = 1;
+}
+}
+//End Region Demo_Reach_Zone
+//End dsregion Demo_Reach_Zone
+//Session list: 
+}
+void Demo_handle_Output_play(struct Demo_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Demo_Reach_Zone
+uint8_t Demo_Demo_Reach_Zone_State_event_consumed = 0;
+if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE) {
+if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
+Demo_Demo_Reach_Zone_OnExit(DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE, _instance);
+_instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_IDLE_STATE;
+Demo_Demo_Reach_Zone_OnEntry(DEMO_DEMO_REACH_ZONE_IDLE_STATE, _instance);
+Demo_Demo_Reach_Zone_State_event_consumed = 1;
+}
+}
+//End Region Demo_Reach_Zone
+//End dsregion Demo_Reach_Zone
+//Session list: 
+}
+void Demo_handle_Output_calibrating(struct Demo_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Demo_Reach_Zone
+uint8_t Demo_Demo_Reach_Zone_State_event_consumed = 0;
+if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_IDLE_STATE) {
+if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
+Demo_Demo_Reach_Zone_OnExit(DEMO_DEMO_REACH_ZONE_IDLE_STATE, _instance);
+_instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE;
+Demo_Demo_Reach_Zone_OnEntry(DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE, _instance);
 Demo_Demo_Reach_Zone_State_event_consumed = 1;
 }
 }
@@ -215,7 +285,11 @@ else if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_SETPOINT_
 if ((cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE) {
 Demo_Demo_Reach_Zone_OnExit(DEMO_DEMO_REACH_ZONE_SETPOINT_STATE, _instance);
 _instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_SETPOINT_STATE;
-Score++;
+
+			Score++;
+			tft.setCursor(100,0);
+			tft.println(Score);
+			
 Demo_Demo_Reach_Zone_OnEntry(DEMO_DEMO_REACH_ZONE_SETPOINT_STATE, _instance);
 return 1;
 }

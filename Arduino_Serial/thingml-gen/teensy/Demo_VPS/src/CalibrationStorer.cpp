@@ -68,38 +68,6 @@ default: break;
 }
 
 // Event Handlers for incoming messages:
-void CalibrationStorer_handle_storer_save(struct CalibrationStorer_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Loader
-uint8_t CalibrationStorer_Loader_State_event_consumed = 0;
-if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_IDLE_STATE) {
-if (CalibrationStorer_Loader_State_event_consumed == 0 && 1) {
-CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
-_instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_SAVE_STATE;
-CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_SAVE_STATE, _instance);
-CalibrationStorer_Loader_State_event_consumed = 1;
-}
-}
-//End Region Loader
-//End dsregion Loader
-//Session list: 
-}
-void CalibrationStorer_handle_storer_load(struct CalibrationStorer_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Loader
-uint8_t CalibrationStorer_Loader_State_event_consumed = 0;
-if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_IDLE_STATE) {
-if (CalibrationStorer_Loader_State_event_consumed == 0 && 1) {
-CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
-_instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_LOAD_STATE;
-CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_LOAD_STATE, _instance);
-CalibrationStorer_Loader_State_event_consumed = 1;
-}
-}
-//End Region Loader
-//End dsregion Loader
-//Session list: 
-}
 void CalibrationStorer_handle_progress_storerToIdle(struct CalibrationStorer_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Loader
@@ -107,6 +75,22 @@ uint8_t CalibrationStorer_Loader_State_event_consumed = 0;
 if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_LOAD_STATE) {
 if (CalibrationStorer_Loader_State_event_consumed == 0 && 1) {
 CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_LOAD_STATE, _instance);
+_instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_IDLE_STATE;
+CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
+CalibrationStorer_Loader_State_event_consumed = 1;
+}
+}
+//End Region Loader
+//End dsregion Loader
+//Session list: 
+}
+void CalibrationStorer_handle_storeWriter_configWritten(struct CalibrationStorer_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Loader
+uint8_t CalibrationStorer_Loader_State_event_consumed = 0;
+if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_SAVE_STATE) {
+if (CalibrationStorer_Loader_State_event_consumed == 0 && 1) {
+CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_SAVE_STATE, _instance);
 _instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_IDLE_STATE;
 CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
 CalibrationStorer_Loader_State_event_consumed = 1;
@@ -160,15 +144,31 @@ CalibrationStorer_Loader_State_event_consumed = 1;
 //End dsregion Loader
 //Session list: 
 }
-void CalibrationStorer_handle_storeWriter_configWritten(struct CalibrationStorer_Instance *_instance) {
+void CalibrationStorer_handle_storer_save(struct CalibrationStorer_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Loader
 uint8_t CalibrationStorer_Loader_State_event_consumed = 0;
-if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_SAVE_STATE) {
+if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_IDLE_STATE) {
 if (CalibrationStorer_Loader_State_event_consumed == 0 && 1) {
-CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_SAVE_STATE, _instance);
-_instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_IDLE_STATE;
-CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
+CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
+_instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_SAVE_STATE;
+CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_SAVE_STATE, _instance);
+CalibrationStorer_Loader_State_event_consumed = 1;
+}
+}
+//End Region Loader
+//End dsregion Loader
+//Session list: 
+}
+void CalibrationStorer_handle_storer_load(struct CalibrationStorer_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Loader
+uint8_t CalibrationStorer_Loader_State_event_consumed = 0;
+if (_instance->CalibrationStorer_Loader_State == CALIBRATIONSTORER_LOADER_IDLE_STATE) {
+if (CalibrationStorer_Loader_State_event_consumed == 0 && 1) {
+CalibrationStorer_Loader_OnExit(CALIBRATIONSTORER_LOADER_IDLE_STATE, _instance);
+_instance->CalibrationStorer_Loader_State = CALIBRATIONSTORER_LOADER_LOAD_STATE;
+CalibrationStorer_Loader_OnEntry(CALIBRATIONSTORER_LOADER_LOAD_STATE, _instance);
 CalibrationStorer_Loader_State_event_consumed = 1;
 }
 }

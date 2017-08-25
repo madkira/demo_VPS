@@ -35,8 +35,8 @@ int Storer_handle_empty_event(struct Storer_Instance *_instance);
 void Storer_EESave_OnEntry(int state, struct Storer_Instance *_instance);
 void Storer_handle_writer_writeConfig(struct Storer_Instance *_instance, double bx, double by, double bz, double brx, double bry, double brz, double cx, double cy, double cz, double crx, double cry, double crz);
 void Storer_handle_writer_writeByte(struct Storer_Instance *_instance, uint8_t id, uint8_t val);
-void Storer_handle_reader_readByte(struct Storer_Instance *_instance, uint8_t id);
 void Storer_handle_reader_readConfig(struct Storer_Instance *_instance);
+void Storer_handle_reader_readByte(struct Storer_Instance *_instance, uint8_t id);
 // Declaration of callbacks for incoming messages:
 void register_Storer_send_reader_byteRead_listener(void (*_listener)(struct Storer_Instance *, uint8_t));
 void register_external_Storer_send_reader_byteRead_listener(void (*_listener)(struct Storer_Instance *, uint8_t));

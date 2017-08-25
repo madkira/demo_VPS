@@ -104,7 +104,7 @@ SIZE = arm-none-eabi-size
 
 # To repalce later by next line
 CPP_FILES := $(wildcard src/*.cpp)
-# CPP_FILES := src/Demo_VPS.cpp src/runtime.cpp src/Storer.cpp src/SerialOut.cpp src/CalibrationValidator.cpp src/SoftButton.cpp src/Backbone.cpp src/PackageReader.cpp src/AngleReader.cpp src/Demo.cpp src/SerialIn.cpp src/Runner.cpp src/Button.cpp src/Blinker.cpp src/Calibrator.cpp src/PulseReader.cpp src/CalibrationStorer.cpp
+# CPP_FILES := src/Demo_VPS.cpp src/runtime.cpp src/Button.cpp src/Storer.cpp src/Runner.cpp src/SoftButton.cpp src/Backbone.cpp src/Blinker.cpp src/CalibrationValidator.cpp src/CalibrationStorer.cpp src/SerialIn.cpp src/Calibrator.cpp src/PackageReader.cpp src/SerialOut.cpp src/AngleReader.cpp src/Demo.cpp src/PulseReader.cpp
 
 
 

@@ -29,7 +29,10 @@ int Demo_handle_empty_event(struct Demo_Instance *_instance);
 // Declaration of prototypes outgoing messages :
 void Demo_Demo_Reach_Zone_OnEntry(int state, struct Demo_Instance *_instance);
 void Demo_handle_Timer_timer_timeout(struct Demo_Instance *_instance, uint8_t id);
+void Demo_handle_Timer_s1_tic(struct Demo_Instance *_instance);
 void Demo_handle_Output_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z);
+void Demo_handle_Output_play(struct Demo_Instance *_instance);
+void Demo_handle_Output_calibrating(struct Demo_Instance *_instance);
 void Demo_handle_Output_noSignal(struct Demo_Instance *_instance);
 // Declaration of callbacks for incoming messages:
 void register_Demo_send_Timer_timer_start_listener(void (*_listener)(struct Demo_Instance *, uint8_t, uint32_t));
@@ -40,8 +43,9 @@ void register_external_Demo_send_Timer_timer_cancel_listener(void (*_listener)(s
 // Definition of the states:
 #define DEMO_DEMO_REACH_ZONE_STATE 0
 #define DEMO_DEMO_REACH_ZONE_IDLE_STATE 1
-#define DEMO_DEMO_REACH_ZONE_SETPOINT_STATE 2
-#define DEMO_DEMO_REACH_ZONE_GAMEOVER_STATE 3
+#define DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE 2
+#define DEMO_DEMO_REACH_ZONE_SETPOINT_STATE 3
+#define DEMO_DEMO_REACH_ZONE_GAMEOVER_STATE 4
 
 
 /*****************************************************/
@@ -209,6 +213,8 @@ uint8_t tar_y;
 
 uint8_t Score = 0;
 
+uint8_t timer = 30;
+
 
 // END: Code from the c_global annotation Demo
 
@@ -231,7 +237,7 @@ case DEMO_DEMO_REACH_ZONE_STATE:{
 _instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_IDLE_STATE;
 
 			tft.initR(INITR_144GREENTAB);
-  			tft.setRotation(3);
+  			tft.setRotation(1);
 			tft.fillScreen(ST7735_BLACK);
 			
 Demo_Demo_Reach_Zone_OnEntry(_instance->Demo_Demo_Reach_Zone_State, _instance);
@@ -243,30 +249,46 @@ case DEMO_DEMO_REACH_ZONE_IDLE_STATE:{
 			tft.fillScreen(ST7735_BLACK);
 		    tar_x = 64;
 		    tar_y = 64;
+			timer = 30;
+			
+break;
+}
+case DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE:{
+
+			tft.fillScreen(ST7735_BLACK);
+			tft.setCursor(5, 5);
+			    tft.setTextColor(ST7735_YELLOW);
+			    tft.setTextSize(2);
+			    tft.println("Calibration");
 			
 break;
 }
 case DEMO_DEMO_REACH_ZONE_SETPOINT_STATE:{
 
 			tft.fillScreen(ST7735_BLACK);
+			tft.setCursor(100,0);
+			tft.println(Score);
+			tft.drawRect(1, 1, timer*3, 2, ST7735_RED);
 			old_x = 0;
 			old_y = 0;
 			cur_x = 0;
 			cur_y = 0;
-			tar_x = random(128);
-			tar_y = random(128);
+			tar_x = 5 + random(110);
+			tar_y = 5 + random(110);
 			
 break;
 }
 case DEMO_DEMO_REACH_ZONE_GAMEOVER_STATE:{
 
 				tft.fillScreen(ST7735_BLACK);
-			    tft.setCursor(40, 30);
-			    tft.setTextColor(ST7735_RED);
-			    tft.setTextSize(1);
-			    tft.println("Game Over");
+			    tft.setCursor(30, 5);
 			    tft.setTextColor(ST7735_YELLOW);
-			    tft.setCursor(60, 50);
+			    tft.setTextSize(3);
+			    tft.println("Game\n");
+			    tft.setCursor(30, 35);
+			    tft.println("Over");
+			    tft.setTextColor(ST7735_GREEN);
+			    tft.setCursor(50, 70);
 			    tft.setTextSize(4);
 			    tft.println(Score);
 				
@@ -284,6 +306,8 @@ case DEMO_DEMO_REACH_ZONE_STATE:{
 Demo_Demo_Reach_Zone_OnExit(_instance->Demo_Demo_Reach_Zone_State, _instance);
 break;}
 case DEMO_DEMO_REACH_ZONE_IDLE_STATE:{
+break;}
+case DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE:{
 break;}
 case DEMO_DEMO_REACH_ZONE_SETPOINT_STATE:{
 break;}
@@ -318,6 +342,23 @@ Demo_Demo_Reach_Zone_State_event_consumed = 1;
 //End dsregion Demo_Reach_Zone
 //Session list: 
 }
+void Demo_handle_Timer_s1_tic(struct Demo_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Demo_Reach_Zone
+uint8_t Demo_Demo_Reach_Zone_State_event_consumed = 0;
+if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_SETPOINT_STATE) {
+if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
+
+			tft.drawRect(1, 1, timer*3, 2, ST7735_BLACK);
+			timer--;
+			tft.drawRect(1, 1, timer*3, 2, ST7735_RED);
+Demo_Demo_Reach_Zone_State_event_consumed = 1;
+}
+}
+//End Region Demo_Reach_Zone
+//End dsregion Demo_Reach_Zone
+//Session list: 
+}
 void Demo_handle_Output_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z) {
 if(!(_instance->active)) return;
 //Region Demo_Reach_Zone
@@ -327,13 +368,14 @@ if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
 
 				old_x = cur_x;
 				old_y = cur_y;
-				cur_y = int(x/1000);
-				cur_x = int(y/1000);
+				cur_x = int(x/1000);
+				cur_y =128 -  int(y/1000);
 				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
 			    tft.setCursor(0, 30);
-		    	tft.setTextColor(ST7735_RED);
+		    	tft.setTextColor(ST7735_YELLOW);
 		    	tft.setTextSize(1);
-		    	tft.println("Reach the center to Start");
+		    	tft.println("   Reach the center");
+		    	tft.println("      to Start");
 			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
 				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
 				
@@ -345,12 +387,44 @@ if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
 
 				old_x = cur_x;
 				old_y = cur_y;
-				cur_y = int(x/1000);
-				cur_x = int(y/1000);
+				cur_x = int(x/1000);
+				cur_y = 128 - int(y/1000);
 				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
 			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
 				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
 				
+Demo_Demo_Reach_Zone_State_event_consumed = 1;
+}
+}
+//End Region Demo_Reach_Zone
+//End dsregion Demo_Reach_Zone
+//Session list: 
+}
+void Demo_handle_Output_play(struct Demo_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Demo_Reach_Zone
+uint8_t Demo_Demo_Reach_Zone_State_event_consumed = 0;
+if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE) {
+if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
+Demo_Demo_Reach_Zone_OnExit(DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE, _instance);
+_instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_IDLE_STATE;
+Demo_Demo_Reach_Zone_OnEntry(DEMO_DEMO_REACH_ZONE_IDLE_STATE, _instance);
+Demo_Demo_Reach_Zone_State_event_consumed = 1;
+}
+}
+//End Region Demo_Reach_Zone
+//End dsregion Demo_Reach_Zone
+//Session list: 
+}
+void Demo_handle_Output_calibrating(struct Demo_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Demo_Reach_Zone
+uint8_t Demo_Demo_Reach_Zone_State_event_consumed = 0;
+if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_IDLE_STATE) {
+if (Demo_Demo_Reach_Zone_State_event_consumed == 0 && 1) {
+Demo_Demo_Reach_Zone_OnExit(DEMO_DEMO_REACH_ZONE_IDLE_STATE, _instance);
+_instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE;
+Demo_Demo_Reach_Zone_OnEntry(DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE, _instance);
 Demo_Demo_Reach_Zone_State_event_consumed = 1;
 }
 }
@@ -395,7 +469,11 @@ else if (_instance->Demo_Demo_Reach_Zone_State == DEMO_DEMO_REACH_ZONE_SETPOINT_
 if ((cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE) {
 Demo_Demo_Reach_Zone_OnExit(DEMO_DEMO_REACH_ZONE_SETPOINT_STATE, _instance);
 _instance->Demo_Demo_Reach_Zone_State = DEMO_DEMO_REACH_ZONE_SETPOINT_STATE;
-Score++;
+
+			Score++;
+			tft.setCursor(100,0);
+			tft.println(Score);
+			
 Demo_Demo_Reach_Zone_OnEntry(DEMO_DEMO_REACH_ZONE_SETPOINT_STATE, _instance);
 return 1;
 }
@@ -439,15 +517,18 @@ if (external_Demo_send_Timer_timer_cancel_listener != 0x0) external_Demo_send_Ti
 uint32_t timer2_timer[timer2_NB_SOFT_TIMER];
 uint32_t  timer2_prev_1sec = 0;
 
-
+uint8_t timer2_tic_flags = 0;
 
 void externalMessageEnqueue(uint8_t * msg, uint8_t msgSize, uint16_t listener_id);
 
-uint8_t timer2_interrupt_counter = 0;
+uint16_t timer2_interrupt_counter = 0;
 SIGNAL(TIMER2_OVF_vect) {
 TCNT2 = 5;
 timer2_interrupt_counter++;
-if(timer2_interrupt_counter >= 0) {
+if((timer2_interrupt_counter % 1000) == 0) {
+timer2_tic_flags |= 0b00000001;
+}
+if(timer2_interrupt_counter >= 1000) {
 timer2_interrupt_counter = 0;
 }
 }
@@ -492,10 +573,19 @@ timer2_timer[id] = 0;
 
 void timer2_timeout(uint8_t id) {
 uint8_t enqueue_buf[3];
-enqueue_buf[0] = (3 >> 8) & 0xFF;
-enqueue_buf[1] = 3 & 0xFF;
+enqueue_buf[0] = (5 >> 8) & 0xFF;
+enqueue_buf[1] = 5 & 0xFF;
 enqueue_buf[2] = id;
 externalMessageEnqueue(enqueue_buf, 3, timer2_instance.listener_id);
+}
+
+void timer2_1000ms_tic() {
+{
+uint8_t enqueue_buf[2];
+enqueue_buf[0] = (6 >> 8) & 0xFF;
+enqueue_buf[1] = 6 & 0xFF;
+externalMessageEnqueue(enqueue_buf, 2, timer2_instance.listener_id);
+}
 }
 
 
@@ -515,7 +605,11 @@ timer2_timeout(t);
     if (timer2_prev_1sec < tms) {
         timer2_prev_1sec += 1000;
     }
-    
+    if((timer2_tic_flags & 0b00000001) >> 0) {
+timer2_1000ms_tic();
+timer2_tic_flags &= 0b11111110;
+}
+
 }
 // Forwarding of messages timer2::Demo::Timer::timer_start
 void forward_timer2_Demo_send_Timer_timer_start(struct Demo_Instance *_instance, uint8_t id, uint32_t time){
@@ -648,8 +742,21 @@ struct Demo_Instance player_var;
 
 
 //New dispatcher for messages
-void dispatch_ms8_tic(uint16_t sender) {
+void dispatch_timer_cancel(uint16_t sender, uint8_t param_id) {
 if (sender == player_var.id_process) {
+
+}
+
+}
+
+
+//New dispatcher for messages
+void dispatch_timer_timeout(uint16_t sender, uint8_t param_id) {
+if (sender == player_var.id_process) {
+
+}
+if (sender == timer2_instance.listener_id) {
+Demo_handle_Timer_timer_timeout(&player_var, param_id);
 
 }
 
@@ -670,8 +777,12 @@ Demo_handle_Output_positionsend(&player_var, param_x, param_y, param_z);
 
 
 //New dispatcher for messages
-void dispatch_timer_cancel(uint16_t sender, uint8_t param_id) {
+void dispatch_play(uint16_t sender) {
 if (sender == player_var.id_process) {
+
+}
+if (sender == Serial_instance.listener_id) {
+Demo_handle_Output_play(&player_var);
 
 }
 
@@ -679,8 +790,25 @@ if (sender == player_var.id_process) {
 
 
 //New dispatcher for messages
-void dispatch_timer_start(uint16_t sender, uint8_t param_id, uint32_t param_time) {
+void dispatch_s1_tic(uint16_t sender) {
 if (sender == player_var.id_process) {
+
+}
+if (sender == timer2_instance.listener_id) {
+Demo_handle_Timer_s1_tic(&player_var);
+
+}
+
+}
+
+
+//New dispatcher for messages
+void dispatch_calibrating(uint16_t sender) {
+if (sender == player_var.id_process) {
+
+}
+if (sender == Serial_instance.listener_id) {
+Demo_handle_Output_calibrating(&player_var);
 
 }
 
@@ -701,12 +829,8 @@ Demo_handle_Output_noSignal(&player_var);
 
 
 //New dispatcher for messages
-void dispatch_timer_timeout(uint16_t sender, uint8_t param_id) {
+void dispatch_timer_start(uint16_t sender, uint8_t param_id, uint32_t param_time) {
 if (sender == player_var.id_process) {
-
-}
-if (sender == timer2_instance.listener_id) {
-Demo_handle_Timer_timer_timeout(&player_var, param_id);
 
 }
 
@@ -725,6 +849,20 @@ code += fifo_dequeue();
 
 // Switch to call the appropriate handler
 switch(code) {
+case 5:{
+byte mbuf[5 - 2];
+while (mbufi < (5 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_timer_timeout = 2;
+union u_timer_timeout_id_t {
+uint8_t p;
+byte bytebuffer[1];
+} u_timer_timeout_id;
+u_timer_timeout_id.bytebuffer[0] = mbuf[mbufi_timer_timeout + 0];
+mbufi_timer_timeout += 1;
+dispatch_timer_timeout((mbuf[0] << 8) + mbuf[1] /* instance port*/,
+ u_timer_timeout_id.p /* id */ );
+break;
+}
 case 1:{
 byte mbuf[16 - 2];
 while (mbufi < (16 - 2)) mbuf[mbufi++] = fifo_dequeue();
@@ -762,25 +900,32 @@ dispatch_positionsend((mbuf[0] << 8) + mbuf[1] /* instance port*/,
  u_positionsend_z.p /* z */ );
 break;
 }
+case 4:{
+byte mbuf[4 - 2];
+while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_play = 2;
+dispatch_play((mbuf[0] << 8) + mbuf[1] /* instance port*/);
+break;
+}
+case 6:{
+byte mbuf[4 - 2];
+while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_s1_tic = 2;
+dispatch_s1_tic((mbuf[0] << 8) + mbuf[1] /* instance port*/);
+break;
+}
+case 3:{
+byte mbuf[4 - 2];
+while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_calibrating = 2;
+dispatch_calibrating((mbuf[0] << 8) + mbuf[1] /* instance port*/);
+break;
+}
 case 2:{
 byte mbuf[4 - 2];
 while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
 uint8_t mbufi_noSignal = 2;
 dispatch_noSignal((mbuf[0] << 8) + mbuf[1] /* instance port*/);
-break;
-}
-case 3:{
-byte mbuf[5 - 2];
-while (mbufi < (5 - 2)) mbuf[mbufi++] = fifo_dequeue();
-uint8_t mbufi_timer_timeout = 2;
-union u_timer_timeout_id_t {
-uint8_t p;
-byte bytebuffer[1];
-} u_timer_timeout_id;
-u_timer_timeout_id.bytebuffer[0] = mbuf[mbufi_timer_timeout + 0];
-mbufi_timer_timeout += 1;
-dispatch_timer_timeout((mbuf[0] << 8) + mbuf[1] /* instance port*/,
- u_timer_timeout_id.p /* id */ );
 break;
 }
 }
@@ -803,16 +948,28 @@ void externalMessageEnqueue(uint8_t * msg, uint8_t msgSize, uint16_t listener_id
 if ((msgSize >= 2) && (msg != NULL)) {
 uint8_t msgSizeOK = 0;
 switch(msg[0] * 256 + msg[1]) {
+case 5:
+if(msgSize == 3) {
+msgSizeOK = 1;}
+break;
 case 1:
 if(msgSize == 14) {
 msgSizeOK = 1;}
 break;
-case 2:
+case 4:
+if(msgSize == 2) {
+msgSizeOK = 1;}
+break;
+case 6:
 if(msgSize == 2) {
 msgSizeOK = 1;}
 break;
 case 3:
-if(msgSize == 3) {
+if(msgSize == 2) {
+msgSizeOK = 1;}
+break;
+case 2:
+if(msgSize == 2) {
 msgSizeOK = 1;}
 break;
 }

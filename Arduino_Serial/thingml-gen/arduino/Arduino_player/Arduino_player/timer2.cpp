@@ -3,15 +3,18 @@
 uint32_t timer2_timer[timer2_NB_SOFT_TIMER];
 uint32_t  timer2_prev_1sec = 0;
 
-
+uint8_t timer2_tic_flags = 0;
 
 void externalMessageEnqueue(uint8_t * msg, uint8_t msgSize, uint16_t listener_id);
 
-uint8_t timer2_interrupt_counter = 0;
+uint16_t timer2_interrupt_counter = 0;
 SIGNAL(TIMER2_OVF_vect) {
 TCNT2 = 5;
 timer2_interrupt_counter++;
-if(timer2_interrupt_counter >= 0) {
+if((timer2_interrupt_counter % 1000) == 0) {
+timer2_tic_flags |= 0b00000001;
+}
+if(timer2_interrupt_counter >= 1000) {
 timer2_interrupt_counter = 0;
 }
 }
@@ -56,10 +59,19 @@ timer2_timer[id] = 0;
 
 void timer2_timeout(uint8_t id) {
 uint8_t enqueue_buf[3];
-enqueue_buf[0] = (3 >> 8) & 0xFF;
-enqueue_buf[1] = 3 & 0xFF;
+enqueue_buf[0] = (5 >> 8) & 0xFF;
+enqueue_buf[1] = 5 & 0xFF;
 enqueue_buf[2] = id;
 externalMessageEnqueue(enqueue_buf, 3, timer2_instance.listener_id);
+}
+
+void timer2_1000ms_tic() {
+{
+uint8_t enqueue_buf[2];
+enqueue_buf[0] = (6 >> 8) & 0xFF;
+enqueue_buf[1] = 6 & 0xFF;
+externalMessageEnqueue(enqueue_buf, 2, timer2_instance.listener_id);
+}
 }
 
 
@@ -79,7 +91,11 @@ timer2_timeout(t);
     if (timer2_prev_1sec < tms) {
         timer2_prev_1sec += 1000;
     }
-    
+    if((timer2_tic_flags & 0b00000001) >> 0) {
+timer2_1000ms_tic();
+timer2_tic_flags &= 0b11111110;
+}
+
 }
 // Forwarding of messages timer2::Demo::Timer::timer_start
 void forward_timer2_Demo_send_Timer_timer_start(struct Demo_Instance *_instance, uint8_t id, uint32_t time){

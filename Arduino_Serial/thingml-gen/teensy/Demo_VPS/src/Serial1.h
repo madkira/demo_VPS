@@ -20,9 +20,13 @@ void Serial1_read();
 
 /********************* FORWARDERS *********************/
 
-/*FORWARDERS*/// Forwarding of messages Serial1::Demo::serial1sender::positionsend
-void forward_Serial1_Demo_send_serial1sender_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z);
+/*FORWARDERS*/// Forwarding of messages Serial1::Demo::serial1sender::calibrating
+void forward_Serial1_Demo_send_serial1sender_calibrating(struct Demo_Instance *_instance);
 // Forwarding of messages Serial1::Demo::serial1sender::noSignal
 void forward_Serial1_Demo_send_serial1sender_noSignal(struct Demo_Instance *_instance);
+// Forwarding of messages Serial1::Demo::serial1sender::play
+void forward_Serial1_Demo_send_serial1sender_play(struct Demo_Instance *_instance);
+// Forwarding of messages Serial1::Demo::serial1sender::positionsend
+void forward_Serial1_Demo_send_serial1sender_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z);
 
 #endif

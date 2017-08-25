@@ -20,8 +20,21 @@ struct Demo_Instance player_var;
 
 
 //New dispatcher for messages
-void dispatch_ms8_tic(uint16_t sender) {
+void dispatch_timer_cancel(uint16_t sender, uint8_t param_id) {
 if (sender == player_var.id_process) {
+
+}
+
+}
+
+
+//New dispatcher for messages
+void dispatch_timer_timeout(uint16_t sender, uint8_t param_id) {
+if (sender == player_var.id_process) {
+
+}
+if (sender == timer2_instance.listener_id) {
+Demo_handle_Timer_timer_timeout(&player_var, param_id);
 
 }
 
@@ -42,8 +55,12 @@ Demo_handle_Output_positionsend(&player_var, param_x, param_y, param_z);
 
 
 //New dispatcher for messages
-void dispatch_timer_cancel(uint16_t sender, uint8_t param_id) {
+void dispatch_play(uint16_t sender) {
 if (sender == player_var.id_process) {
+
+}
+if (sender == Serial_instance.listener_id) {
+Demo_handle_Output_play(&player_var);
 
 }
 
@@ -51,8 +68,25 @@ if (sender == player_var.id_process) {
 
 
 //New dispatcher for messages
-void dispatch_timer_start(uint16_t sender, uint8_t param_id, uint32_t param_time) {
+void dispatch_s1_tic(uint16_t sender) {
 if (sender == player_var.id_process) {
+
+}
+if (sender == timer2_instance.listener_id) {
+Demo_handle_Timer_s1_tic(&player_var);
+
+}
+
+}
+
+
+//New dispatcher for messages
+void dispatch_calibrating(uint16_t sender) {
+if (sender == player_var.id_process) {
+
+}
+if (sender == Serial_instance.listener_id) {
+Demo_handle_Output_calibrating(&player_var);
 
 }
 
@@ -73,12 +107,8 @@ Demo_handle_Output_noSignal(&player_var);
 
 
 //New dispatcher for messages
-void dispatch_timer_timeout(uint16_t sender, uint8_t param_id) {
+void dispatch_timer_start(uint16_t sender, uint8_t param_id, uint32_t param_time) {
 if (sender == player_var.id_process) {
-
-}
-if (sender == timer2_instance.listener_id) {
-Demo_handle_Timer_timer_timeout(&player_var, param_id);
 
 }
 
@@ -97,6 +127,20 @@ code += fifo_dequeue();
 
 // Switch to call the appropriate handler
 switch(code) {
+case 5:{
+byte mbuf[5 - 2];
+while (mbufi < (5 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_timer_timeout = 2;
+union u_timer_timeout_id_t {
+uint8_t p;
+byte bytebuffer[1];
+} u_timer_timeout_id;
+u_timer_timeout_id.bytebuffer[0] = mbuf[mbufi_timer_timeout + 0];
+mbufi_timer_timeout += 1;
+dispatch_timer_timeout((mbuf[0] << 8) + mbuf[1] /* instance port*/,
+ u_timer_timeout_id.p /* id */ );
+break;
+}
 case 1:{
 byte mbuf[16 - 2];
 while (mbufi < (16 - 2)) mbuf[mbufi++] = fifo_dequeue();
@@ -134,25 +178,32 @@ dispatch_positionsend((mbuf[0] << 8) + mbuf[1] /* instance port*/,
  u_positionsend_z.p /* z */ );
 break;
 }
+case 4:{
+byte mbuf[4 - 2];
+while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_play = 2;
+dispatch_play((mbuf[0] << 8) + mbuf[1] /* instance port*/);
+break;
+}
+case 6:{
+byte mbuf[4 - 2];
+while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_s1_tic = 2;
+dispatch_s1_tic((mbuf[0] << 8) + mbuf[1] /* instance port*/);
+break;
+}
+case 3:{
+byte mbuf[4 - 2];
+while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
+uint8_t mbufi_calibrating = 2;
+dispatch_calibrating((mbuf[0] << 8) + mbuf[1] /* instance port*/);
+break;
+}
 case 2:{
 byte mbuf[4 - 2];
 while (mbufi < (4 - 2)) mbuf[mbufi++] = fifo_dequeue();
 uint8_t mbufi_noSignal = 2;
 dispatch_noSignal((mbuf[0] << 8) + mbuf[1] /* instance port*/);
-break;
-}
-case 3:{
-byte mbuf[5 - 2];
-while (mbufi < (5 - 2)) mbuf[mbufi++] = fifo_dequeue();
-uint8_t mbufi_timer_timeout = 2;
-union u_timer_timeout_id_t {
-uint8_t p;
-byte bytebuffer[1];
-} u_timer_timeout_id;
-u_timer_timeout_id.bytebuffer[0] = mbuf[mbufi_timer_timeout + 0];
-mbufi_timer_timeout += 1;
-dispatch_timer_timeout((mbuf[0] << 8) + mbuf[1] /* instance port*/,
- u_timer_timeout_id.p /* id */ );
 break;
 }
 }
@@ -175,16 +226,28 @@ void externalMessageEnqueue(uint8_t * msg, uint8_t msgSize, uint16_t listener_id
 if ((msgSize >= 2) && (msg != NULL)) {
 uint8_t msgSizeOK = 0;
 switch(msg[0] * 256 + msg[1]) {
+case 5:
+if(msgSize == 3) {
+msgSizeOK = 1;}
+break;
 case 1:
 if(msgSize == 14) {
 msgSizeOK = 1;}
 break;
-case 2:
+case 4:
+if(msgSize == 2) {
+msgSizeOK = 1;}
+break;
+case 6:
 if(msgSize == 2) {
 msgSizeOK = 1;}
 break;
 case 3:
-if(msgSize == 3) {
+if(msgSize == 2) {
+msgSizeOK = 1;}
+break;
+case 2:
+if(msgSize == 2) {
 msgSizeOK = 1;}
 break;
 }

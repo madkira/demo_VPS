@@ -32,12 +32,12 @@ int Calibrator_Calibrator_State;
 int Calibrator_handle_empty_event(struct Calibrator_Instance *_instance);
 // Declaration of prototypes outgoing messages :
 void Calibrator_Calibrator_OnEntry(int state, struct Calibrator_Instance *_instance);
-void Calibrator_handle_avt_calibrating(struct Calibrator_Instance *_instance);
-void Calibrator_handle_avt_calibrationFailed(struct Calibrator_Instance *_instance);
-void Calibrator_handle_avt_calibrationComplete(struct Calibrator_Instance *_instance);
-void Calibrator_handle_calibrator_calibrate(struct Calibrator_Instance *_instance);
-void Calibrator_handle_calibrator_entrypoint(struct Calibrator_Instance *_instance);
 void Calibrator_handle_calibrator_receiveAngles(struct Calibrator_Instance *_instance, double bh, double bv, double ch, double cv);
+void Calibrator_handle_calibrator_entrypoint(struct Calibrator_Instance *_instance);
+void Calibrator_handle_calibrator_calibrate(struct Calibrator_Instance *_instance);
+void Calibrator_handle_avt_calibrationFailed(struct Calibrator_Instance *_instance);
+void Calibrator_handle_avt_calibrating(struct Calibrator_Instance *_instance);
+void Calibrator_handle_avt_calibrationComplete(struct Calibrator_Instance *_instance);
 // Declaration of callbacks for incoming messages:
 void register_Calibrator_send_calibrator_endcalibrate_listener(void (*_listener)(struct Calibrator_Instance *));
 void register_external_Calibrator_send_calibrator_endcalibrate_listener(void (*_listener)(struct Calibrator_Instance *));

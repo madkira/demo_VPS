@@ -16,20 +16,26 @@
     <messages name="noSignal">
       <annotations name="code" value="2"/>
     </messages>
+    <messages name="calibrating">
+      <annotations name="code" value="3"/>
+    </messages>
+    <messages name="play">
+      <annotations name="code" value="4"/>
+    </messages>
   </types>
   <types xsi:type="thingML:Thing" name="Demo" includes="//@types.0 //@types.16">
     <annotations name="c_header" value="&#xA;#include &lt;Adafruit_ST7735.h>&#xA;#include &lt;Adafruit_GFX.h>&#xA;"/>
-    <annotations name="c_global" value="&#xA;#define TFT_CS     10&#xA;#define TFT_RST    9&#xA;#define TFT_DC     8&#xA;Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);&#xA;&#xA;#define TFT_SCLK 13   // set these to be whatever pins you like!&#xA;#define TFT_MOSI 11   // set these to be whatever pins you like!&#xA;//Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);&#xA;&#xA;#define DOT 2&#xA;#define CIRCLE 4&#xA;&#xA;uint8_t old_x;&#xA;uint8_t old_y;&#xA;&#xA;uint8_t cur_x;&#xA;uint8_t cur_y;&#xA;&#xA;uint8_t tar_x;&#xA;uint8_t tar_y;&#xA;&#xA;uint8_t Score = 0;&#xA;&#xA;"/>
-    <ports xsi:type="thingML:RequiredPort" name="Output" receives="//@types.0/@messages.0 //@types.0/@messages.1"/>
-    <ports xsi:type="thingML:RequiredPort" name="Timer" sends="//@types.16/@messages.0 //@types.16/@messages.1" receives="//@types.16/@messages.2"/>
+    <annotations name="c_global" value="&#xA;#define TFT_CS     10&#xA;#define TFT_RST    9&#xA;#define TFT_DC     8&#xA;Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);&#xA;&#xA;#define TFT_SCLK 13   // set these to be whatever pins you like!&#xA;#define TFT_MOSI 11   // set these to be whatever pins you like!&#xA;//Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);&#xA;&#xA;#define DOT 2&#xA;#define CIRCLE 4&#xA;&#xA;uint8_t old_x;&#xA;uint8_t old_y;&#xA;&#xA;uint8_t cur_x;&#xA;uint8_t cur_y;&#xA;&#xA;uint8_t tar_x;&#xA;uint8_t tar_y;&#xA;&#xA;uint8_t Score = 0;&#xA;&#xA;uint8_t timer = 30;&#xA;&#xA;"/>
+    <ports xsi:type="thingML:RequiredPort" name="Output" receives="//@types.0/@messages.0 //@types.0/@messages.1 //@types.0/@messages.3 //@types.0/@messages.2"/>
+    <ports xsi:type="thingML:RequiredPort" name="Timer" sends="//@types.16/@messages.0 //@types.16/@messages.1" receives="//@types.16/@messages.2 //@types.16/@messages.3"/>
     <ports xsi:type="thingML:InternalPort" name="process"/>
     <behaviour name="Demo_Reach_Zone" initial="//@types.1/@behaviour.0/@substate.0">
       <entry xsi:type="thingML:ActionBlock">
-        <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;tft.initR(INITR_144GREENTAB);&#xA;  &#x9;&#x9;&#x9;tft.setRotation(3);&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;"/>
+        <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;tft.initR(INITR_144GREENTAB);&#xA;  &#x9;&#x9;&#x9;tft.setRotation(1);&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;"/>
       </entry>
       <substate name="Idle">
         <entry xsi:type="thingML:ActionBlock">
-          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;Score = 0;&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;    tar_x = 64;&#xA;&#x9;&#x9;    tar_y = 64;&#xA;&#x9;&#x9;&#x9;"/>
+          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;Score = 0;&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;    tar_x = 64;&#xA;&#x9;&#x9;    tar_y = 64;&#xA;&#x9;&#x9;&#x9;timer = 30;&#xA;&#x9;&#x9;&#x9;"/>
         </entry>
         <internal>
           <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.0/@messages.1"/>
@@ -37,32 +43,43 @@
         </internal>
         <internal>
           <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.0/@messages.0"/>
-          <action xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;&#x9;old_x = cur_x;&#xA;&#x9;&#x9;&#x9;&#x9;old_y = cur_y;&#xA;&#x9;&#x9;&#x9;&#x9;cur_y = int(">
+          <action xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;&#x9;old_x = cur_x;&#xA;&#x9;&#x9;&#x9;&#x9;old_y = cur_y;&#xA;&#x9;&#x9;&#x9;&#x9;cur_x = int(">
             <segments xsi:type="thingML:EventReference" receiveMsg="//@types.1/@behaviour.0/@substate.0/@internal.1/@event.0" parameter="//@types.0/@messages.0/@parameters.0"/>
-            <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;cur_x = int(">
+            <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;cur_y =128 -  int(">
               <segments xsi:type="thingML:EventReference" receiveMsg="//@types.1/@behaviour.0/@substate.0/@internal.1/@event.0" parameter="//@types.0/@messages.0/@parameters.1"/>
-              <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(0, 30);&#xA;&#x9;&#x9;    &#x9;tft.setTextColor(ST7735_RED);&#xA;&#x9;&#x9;    &#x9;tft.setTextSize(1);&#xA;&#x9;&#x9;    &#x9;tft.println(&quot;Reach the center to Start&quot;);&#xA;&#x9;&#x9;&#x9;    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);&#xA;&#x9;&#x9;&#x9;&#x9;"/>
+              <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(0, 30);&#xA;&#x9;&#x9;    &#x9;tft.setTextColor(ST7735_YELLOW);&#xA;&#x9;&#x9;    &#x9;tft.setTextSize(1);&#xA;&#x9;&#x9;    &#x9;tft.println(&quot;   Reach the center&quot;);&#xA;&#x9;&#x9;    &#x9;tft.println(&quot;      to Start&quot;);&#xA;&#x9;&#x9;&#x9;    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);&#xA;&#x9;&#x9;&#x9;&#x9;"/>
             </segments>
           </action>
         </internal>
-        <outgoing target="//@types.1/@behaviour.0/@substate.1">
+        <outgoing target="//@types.1/@behaviour.0/@substate.2">
           <guard xsi:type="thingML:ExternExpression" expression="(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) &lt; CIRCLE*CIRCLE"/>
           <action xsi:type="thingML:SendAction" port="//@types.1/@ports.1" message="//@types.16/@messages.0">
             <parameters xsi:type="thingML:IntegerLiteral"/>
             <parameters xsi:type="thingML:IntegerLiteral" intValue="30000"/>
           </action>
         </outgoing>
+        <outgoing target="//@types.1/@behaviour.0/@substate.1">
+          <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.0/@messages.2"/>
+        </outgoing>
+      </substate>
+      <substate name="Calibration">
+        <entry xsi:type="thingML:ActionBlock">
+          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;tft.setCursor(5, 5);&#xA;&#x9;&#x9;&#x9;    tft.setTextColor(ST7735_YELLOW);&#xA;&#x9;&#x9;&#x9;    tft.setTextSize(2);&#xA;&#x9;&#x9;&#x9;    tft.println(&quot;Calibration&quot;);&#xA;&#x9;&#x9;&#x9;"/>
+        </entry>
+        <outgoing target="//@types.1/@behaviour.0/@substate.0">
+          <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.0/@messages.3"/>
+        </outgoing>
       </substate>
       <substate name="SetPoint">
         <entry xsi:type="thingML:ActionBlock">
-          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;old_x = 0;&#xA;&#x9;&#x9;&#x9;old_y = 0;&#xA;&#x9;&#x9;&#x9;cur_x = 0;&#xA;&#x9;&#x9;&#x9;cur_y = 0;&#xA;&#x9;&#x9;&#x9;tar_x = random(128);&#xA;&#x9;&#x9;&#x9;tar_y = random(128);&#xA;&#x9;&#x9;&#x9;"/>
+          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;tft.setCursor(100,0);&#xA;&#x9;&#x9;&#x9;tft.println(Score);&#xA;&#x9;&#x9;&#x9;tft.drawRect(1, 1, timer*3, 2, ST7735_RED);&#xA;&#x9;&#x9;&#x9;old_x = 0;&#xA;&#x9;&#x9;&#x9;old_y = 0;&#xA;&#x9;&#x9;&#x9;cur_x = 0;&#xA;&#x9;&#x9;&#x9;cur_y = 0;&#xA;&#x9;&#x9;&#x9;tar_x = 5 + random(110);&#xA;&#x9;&#x9;&#x9;tar_y = 5 + random(110);&#xA;&#x9;&#x9;&#x9;"/>
         </entry>
         <internal>
           <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.0/@messages.0"/>
-          <action xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;&#x9;old_x = cur_x;&#xA;&#x9;&#x9;&#x9;&#x9;old_y = cur_y;&#xA;&#x9;&#x9;&#x9;&#x9;cur_y = int(">
-            <segments xsi:type="thingML:EventReference" receiveMsg="//@types.1/@behaviour.0/@substate.1/@internal.0/@event.0" parameter="//@types.0/@messages.0/@parameters.0"/>
-            <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;cur_x = int(">
-              <segments xsi:type="thingML:EventReference" receiveMsg="//@types.1/@behaviour.0/@substate.1/@internal.0/@event.0" parameter="//@types.0/@messages.0/@parameters.1"/>
+          <action xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;&#x9;old_x = cur_x;&#xA;&#x9;&#x9;&#x9;&#x9;old_y = cur_y;&#xA;&#x9;&#x9;&#x9;&#x9;cur_x = int(">
+            <segments xsi:type="thingML:EventReference" receiveMsg="//@types.1/@behaviour.0/@substate.2/@internal.0/@event.0" parameter="//@types.0/@messages.0/@parameters.0"/>
+            <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;cur_y = 128 - int(">
+              <segments xsi:type="thingML:EventReference" receiveMsg="//@types.1/@behaviour.0/@substate.2/@internal.0/@event.0" parameter="//@types.0/@messages.0/@parameters.1"/>
               <segments xsi:type="thingML:ExternExpression" expression="/1000);&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);&#xA;&#x9;&#x9;&#x9;&#x9;"/>
             </segments>
           </action>
@@ -71,17 +88,21 @@
           <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.0/@messages.1"/>
           <action xsi:type="thingML:ExternStatement" statement="tft.fillCircle(cur_x, cur_y, DOT, ST7735_RED);"/>
         </internal>
-        <outgoing target="//@types.1/@behaviour.0/@substate.1">
-          <guard xsi:type="thingML:ExternExpression" expression="(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) &lt; CIRCLE*CIRCLE"/>
-          <action xsi:type="thingML:ExternStatement" statement="Score++;"/>
-        </outgoing>
+        <internal>
+          <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.1" message="//@types.16/@messages.3"/>
+          <action xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;tft.drawRect(1, 1, timer*3, 2, ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;timer--;&#xA;&#x9;&#x9;&#x9;tft.drawRect(1, 1, timer*3, 2, ST7735_RED);"/>
+        </internal>
         <outgoing target="//@types.1/@behaviour.0/@substate.2">
+          <guard xsi:type="thingML:ExternExpression" expression="(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) &lt; CIRCLE*CIRCLE"/>
+          <action xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;Score++;&#xA;&#x9;&#x9;&#x9;tft.setCursor(100,0);&#xA;&#x9;&#x9;&#x9;tft.println(Score);&#xA;&#x9;&#x9;&#x9;"/>
+        </outgoing>
+        <outgoing target="//@types.1/@behaviour.0/@substate.3">
           <event xsi:type="thingML:ReceiveMessage" port="//@types.1/@ports.1" message="//@types.16/@messages.2"/>
         </outgoing>
       </substate>
       <substate name="GameOver">
         <entry xsi:type="thingML:ActionBlock">
-          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(40, 30);&#xA;&#x9;&#x9;&#x9;    tft.setTextColor(ST7735_RED);&#xA;&#x9;&#x9;&#x9;    tft.setTextSize(1);&#xA;&#x9;&#x9;&#x9;    tft.println(&quot;Game Over&quot;);&#xA;&#x9;&#x9;&#x9;    tft.setTextColor(ST7735_YELLOW);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(60, 50);&#xA;&#x9;&#x9;&#x9;    tft.setTextSize(4);&#xA;&#x9;&#x9;&#x9;    tft.println(Score);&#xA;&#x9;&#x9;&#x9;&#x9;"/>
+          <actions xsi:type="thingML:ExternStatement" statement="&#xA;&#x9;&#x9;&#x9;&#x9;tft.fillScreen(ST7735_BLACK);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(30, 5);&#xA;&#x9;&#x9;&#x9;    tft.setTextColor(ST7735_YELLOW);&#xA;&#x9;&#x9;&#x9;    tft.setTextSize(3);&#xA;&#x9;&#x9;&#x9;    tft.println(&quot;Game\n&quot;);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(30, 35);&#xA;&#x9;&#x9;&#x9;    tft.println(&quot;Over&quot;);&#xA;&#x9;&#x9;&#x9;    tft.setTextColor(ST7735_GREEN);&#xA;&#x9;&#x9;&#x9;    tft.setCursor(50, 70);&#xA;&#x9;&#x9;&#x9;    tft.setTextSize(4);&#xA;&#x9;&#x9;&#x9;    tft.println(Score);&#xA;&#x9;&#x9;&#x9;&#x9;"/>
           <actions xsi:type="thingML:SendAction" port="//@types.1/@ports.1" message="//@types.16/@messages.0">
             <parameters xsi:type="thingML:IntegerLiteral"/>
             <parameters xsi:type="thingML:IntegerLiteral" intValue="5000"/>
@@ -201,8 +222,8 @@
         <typeRef type="//@types.5"/>
       </parameters>
     </messages>
-    <messages name="ms8_tic">
-      <annotations name="xms_tic" value="8"/>
+    <messages name="s1_tic">
+      <annotations name="xms_tic" value="1000"/>
     </messages>
   </types>
   <protocols name="Serial">

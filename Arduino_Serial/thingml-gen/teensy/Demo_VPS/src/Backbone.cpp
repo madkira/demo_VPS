@@ -121,6 +121,109 @@ default: break;
 }
 
 // Event Handlers for incoming messages:
+void Backbone_handle_AngleReceiver_allAngles(struct Backbone_Instance *_instance, double bh, double bv, double ch, double cv) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+Backbone_send_calibrator_receiveAngles(_instance, bh, bv, ch, cv);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+else if (_instance->Backbone_Main_State == BACKBONE_MAIN_RUNNER_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+Backbone_send_Run_baseStationAngles(_instance, bh, bv, ch, cv);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+//End Region Main
+//End dsregion Main
+//Session list: 
+if (1) {
+angleReadingArrived = true;
+Backbone_Main_State_event_consumed = 1;
+}
+}
+void Backbone_handle_StatusHandler_status(struct Backbone_Instance *_instance, uint8_t id) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+//End Region Main
+//End dsregion Main
+//Session list: 
+if (1) {
+f_Backbone_sendStatus(_instance, id);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+void Backbone_handle_CalibrationStorer_endload(struct Backbone_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+if (_instance->Backbone_Main_State == BACKBONE_MAIN_LOAD_CALIBRATION_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+Backbone_Main_OnExit(BACKBONE_MAIN_LOAD_CALIBRATION_STATE, _instance);
+_instance->Backbone_Main_State = BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE;
+f_Backbone_sendStatus(_instance, 5);
+Backbone_Main_OnEntry(BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE, _instance);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+//End Region Main
+//End dsregion Main
+//Session list: 
+}
+void Backbone_handle_CalibrationStorer_errorload(struct Backbone_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+if (_instance->Backbone_Main_State == BACKBONE_MAIN_LOAD_CALIBRATION_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+Backbone_Main_OnExit(BACKBONE_MAIN_LOAD_CALIBRATION_STATE, _instance);
+_instance->Backbone_Main_State = BACKBONE_MAIN_CALIBRATION_STATE;
+f_Backbone_sendStatus(_instance, 6);
+Backbone_Main_OnEntry(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+//End Region Main
+//End dsregion Main
+//Session list: 
+}
+void Backbone_handle_calibrator_endcalibrate(struct Backbone_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+Backbone_Main_OnExit(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
+_instance->Backbone_Main_State = BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE;
+Backbone_send_CalibrationStorer_save(_instance);
+Backbone_Main_OnEntry(BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE, _instance);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+//End Region Main
+//End dsregion Main
+//Session list: 
+}
+void Backbone_handle_calibrator_errcalibrate(struct Backbone_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+Backbone_Main_OnExit(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
+_instance->Backbone_Main_State = BACKBONE_MAIN_CALIBRATION_STATE;
+Backbone_Main_OnEntry(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+//End Region Main
+//End dsregion Main
+//Session list: 
+}
 void Backbone_handle_StateHandler_currentState(struct Backbone_Instance *_instance, uint8_t id) {
 if(!(_instance->active)) return;
 //Region Main
@@ -167,6 +270,24 @@ Backbone_Main_State_event_consumed = 1;
 //End dsregion Main
 //Session list: 
 }
+void Backbone_handle_Run_coordinates(struct Backbone_Instance *_instance, double x, double y, double z, double separation) {
+if(!(_instance->active)) return;
+//Region Main
+uint8_t Backbone_Main_State_event_consumed = 0;
+if (_instance->Backbone_Main_State == BACKBONE_MAIN_RUNNER_STATE) {
+if (Backbone_Main_State_event_consumed == 0 && 1) {
+if(DEBUG) {
+Backbone_send_printer_printPoint(_instance, x, y, z, separation, VERBOSE);
+
+}
+Backbone_send_Output_positionCoordinates(_instance, x, y, z);
+Backbone_Main_State_event_consumed = 1;
+}
+}
+//End Region Main
+//End dsregion Main
+//Session list: 
+}
 void Backbone_handle_presser_long_press(struct Backbone_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Main
@@ -191,20 +312,6 @@ Backbone_Main_State_event_consumed = 1;
 //End dsregion Main
 //Session list: 
 }
-void Backbone_handle_presser_click(struct Backbone_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_send_calibrator_entrypoint(_instance);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-//End Region Main
-//End dsregion Main
-//Session list: 
-}
 void Backbone_handle_presser_double_click(struct Backbone_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Main
@@ -217,120 +324,13 @@ VERBOSE = DEBUG & !VERBOSE;
 Backbone_Main_State_event_consumed = 1;
 }
 }
-void Backbone_handle_StatusHandler_status(struct Backbone_Instance *_instance, uint8_t id) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-//End Region Main
-//End dsregion Main
-//Session list: 
-if (1) {
-f_Backbone_sendStatus(_instance, id);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-void Backbone_handle_Run_coordinates(struct Backbone_Instance *_instance, double x, double y, double z, double separation) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-if (_instance->Backbone_Main_State == BACKBONE_MAIN_RUNNER_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-if(DEBUG) {
-Backbone_send_printer_printPoint(_instance, x, y, z, separation, VERBOSE);
-
-}
-Backbone_send_Output_positionCoordinates(_instance, x, y, z);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-//End Region Main
-//End dsregion Main
-//Session list: 
-}
-void Backbone_handle_AngleReceiver_allAngles(struct Backbone_Instance *_instance, double bh, double bv, double ch, double cv) {
+void Backbone_handle_presser_click(struct Backbone_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region Main
 uint8_t Backbone_Main_State_event_consumed = 0;
 if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
 if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_send_calibrator_receiveAngles(_instance, bh, bv, ch, cv);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-else if (_instance->Backbone_Main_State == BACKBONE_MAIN_RUNNER_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_send_Run_baseStationAngles(_instance, bh, bv, ch, cv);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-//End Region Main
-//End dsregion Main
-//Session list: 
-if (1) {
-angleReadingArrived = true;
-Backbone_Main_State_event_consumed = 1;
-}
-}
-void Backbone_handle_calibrator_endcalibrate(struct Backbone_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_Main_OnExit(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
-_instance->Backbone_Main_State = BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE;
-Backbone_send_CalibrationStorer_save(_instance);
-Backbone_Main_OnEntry(BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE, _instance);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-//End Region Main
-//End dsregion Main
-//Session list: 
-}
-void Backbone_handle_calibrator_errcalibrate(struct Backbone_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-if (_instance->Backbone_Main_State == BACKBONE_MAIN_CALIBRATION_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_Main_OnExit(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
-_instance->Backbone_Main_State = BACKBONE_MAIN_CALIBRATION_STATE;
-Backbone_Main_OnEntry(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-//End Region Main
-//End dsregion Main
-//Session list: 
-}
-void Backbone_handle_CalibrationStorer_endload(struct Backbone_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-if (_instance->Backbone_Main_State == BACKBONE_MAIN_LOAD_CALIBRATION_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_Main_OnExit(BACKBONE_MAIN_LOAD_CALIBRATION_STATE, _instance);
-_instance->Backbone_Main_State = BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE;
-f_Backbone_sendStatus(_instance, 5);
-Backbone_Main_OnEntry(BACKBONE_MAIN_VALIDATE_CALIBRATION_STATE, _instance);
-Backbone_Main_State_event_consumed = 1;
-}
-}
-//End Region Main
-//End dsregion Main
-//Session list: 
-}
-void Backbone_handle_CalibrationStorer_errorload(struct Backbone_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region Main
-uint8_t Backbone_Main_State_event_consumed = 0;
-if (_instance->Backbone_Main_State == BACKBONE_MAIN_LOAD_CALIBRATION_STATE) {
-if (Backbone_Main_State_event_consumed == 0 && 1) {
-Backbone_Main_OnExit(BACKBONE_MAIN_LOAD_CALIBRATION_STATE, _instance);
-_instance->Backbone_Main_State = BACKBONE_MAIN_CALIBRATION_STATE;
-f_Backbone_sendStatus(_instance, 6);
-Backbone_Main_OnEntry(BACKBONE_MAIN_CALIBRATION_STATE, _instance);
+Backbone_send_calibrator_entrypoint(_instance);
 Backbone_Main_State_event_consumed = 1;
 }
 }

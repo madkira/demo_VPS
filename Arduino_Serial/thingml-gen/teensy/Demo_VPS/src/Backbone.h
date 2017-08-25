@@ -41,19 +41,19 @@ int Backbone_Main_State;
 int Backbone_handle_empty_event(struct Backbone_Instance *_instance);
 // Declaration of prototypes outgoing messages :
 void Backbone_Main_OnEntry(int state, struct Backbone_Instance *_instance);
+void Backbone_handle_AngleReceiver_allAngles(struct Backbone_Instance *_instance, double bh, double bv, double ch, double cv);
+void Backbone_handle_StatusHandler_status(struct Backbone_Instance *_instance, uint8_t id);
+void Backbone_handle_CalibrationStorer_endload(struct Backbone_Instance *_instance);
+void Backbone_handle_CalibrationStorer_errorload(struct Backbone_Instance *_instance);
+void Backbone_handle_calibrator_endcalibrate(struct Backbone_Instance *_instance);
+void Backbone_handle_calibrator_errcalibrate(struct Backbone_Instance *_instance);
 void Backbone_handle_StateHandler_currentState(struct Backbone_Instance *_instance, uint8_t id);
 void Backbone_handle_validator_errvalidate(struct Backbone_Instance *_instance);
 void Backbone_handle_validator_endvalidate(struct Backbone_Instance *_instance);
-void Backbone_handle_presser_long_press(struct Backbone_Instance *_instance);
-void Backbone_handle_presser_click(struct Backbone_Instance *_instance);
-void Backbone_handle_presser_double_click(struct Backbone_Instance *_instance);
-void Backbone_handle_StatusHandler_status(struct Backbone_Instance *_instance, uint8_t id);
 void Backbone_handle_Run_coordinates(struct Backbone_Instance *_instance, double x, double y, double z, double separation);
-void Backbone_handle_AngleReceiver_allAngles(struct Backbone_Instance *_instance, double bh, double bv, double ch, double cv);
-void Backbone_handle_calibrator_endcalibrate(struct Backbone_Instance *_instance);
-void Backbone_handle_calibrator_errcalibrate(struct Backbone_Instance *_instance);
-void Backbone_handle_CalibrationStorer_endload(struct Backbone_Instance *_instance);
-void Backbone_handle_CalibrationStorer_errorload(struct Backbone_Instance *_instance);
+void Backbone_handle_presser_long_press(struct Backbone_Instance *_instance);
+void Backbone_handle_presser_double_click(struct Backbone_Instance *_instance);
+void Backbone_handle_presser_click(struct Backbone_Instance *_instance);
 // Declaration of callbacks for incoming messages:
 void register_Backbone_send_Output_positionCoordinates_listener(void (*_listener)(struct Backbone_Instance *, double, double, double));
 void register_external_Backbone_send_Output_positionCoordinates_listener(void (*_listener)(struct Backbone_Instance *, double, double, double));

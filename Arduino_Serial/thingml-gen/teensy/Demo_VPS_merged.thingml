@@ -1,14 +1,16 @@
 thing fragment aze {
 	message positionsend(x : UInt32, y : UInt32, z : UInt32)
 	@code "1" message noSignal()
-	@code "2"
+	@code "2" message calibrating()
+	@code "3" message play()
+	@code "4"
 }
-thing Demo includes aze , OutputMessage {
+thing Demo includes aze , OutputMessage , eCalibration , eCalibrationValidator {
 	required port op {
-		receives positionCoordinates receives nothing
+		receives positionCoordinates receives nothing receives calibrate receives endvalidate
 	}
 	provided port serial1sender {
-		sends positionsend sends noSignal
+		sends positionsend sends noSignal sends calibrating sends play
 	}
 	statechart alpha init Idle {
 		state Idle {
@@ -25,6 +27,12 @@ thing Demo includes aze , OutputMessage {
 			internal
 			event m : op?nothing
 			action serial1sender!noSignal()
+			internal
+			event m : op?calibrate
+			action serial1sender!calibrating()
+			internal
+			event m : op?endvalidate
+			action serial1sender!play()
 		}
 	}
 }

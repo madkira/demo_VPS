@@ -30,8 +30,8 @@ uint16_t SoftButton_long_delay_var;
 int SoftButton_handle_empty_event(struct SoftButton_Instance *_instance);
 // Declaration of prototypes outgoing messages :
 void SoftButton_SoftButtonImpl_OnEntry(int state, struct SoftButton_Instance *_instance);
-void SoftButton_handle_Button_press(struct SoftButton_Instance *_instance);
 void SoftButton_handle_Button_release(struct SoftButton_Instance *_instance);
+void SoftButton_handle_Button_press(struct SoftButton_Instance *_instance);
 void SoftButton_handle_Timer_timer_timeout(struct SoftButton_Instance *_instance);
 // Declaration of callbacks for incoming messages:
 void register_SoftButton_send_Timer_timer_timeout_listener(void (*_listener)(struct SoftButton_Instance *));

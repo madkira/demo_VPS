@@ -33,7 +33,10 @@ int Demo_handle_empty_event(struct Demo_Instance *_instance);
 // Declaration of prototypes outgoing messages :
 void Demo_Demo_Reach_Zone_OnEntry(int state, struct Demo_Instance *_instance);
 void Demo_handle_Timer_timer_timeout(struct Demo_Instance *_instance, uint8_t id);
+void Demo_handle_Timer_s1_tic(struct Demo_Instance *_instance);
 void Demo_handle_Output_positionsend(struct Demo_Instance *_instance, uint32_t x, uint32_t y, uint32_t z);
+void Demo_handle_Output_play(struct Demo_Instance *_instance);
+void Demo_handle_Output_calibrating(struct Demo_Instance *_instance);
 void Demo_handle_Output_noSignal(struct Demo_Instance *_instance);
 // Declaration of callbacks for incoming messages:
 void register_Demo_send_Timer_timer_start_listener(void (*_listener)(struct Demo_Instance *, uint8_t, uint32_t));
@@ -44,8 +47,9 @@ void register_external_Demo_send_Timer_timer_cancel_listener(void (*_listener)(s
 // Definition of the states:
 #define DEMO_DEMO_REACH_ZONE_STATE 0
 #define DEMO_DEMO_REACH_ZONE_IDLE_STATE 1
-#define DEMO_DEMO_REACH_ZONE_SETPOINT_STATE 2
-#define DEMO_DEMO_REACH_ZONE_GAMEOVER_STATE 3
+#define DEMO_DEMO_REACH_ZONE_CALIBRATION_STATE 2
+#define DEMO_DEMO_REACH_ZONE_SETPOINT_STATE 3
+#define DEMO_DEMO_REACH_ZONE_GAMEOVER_STATE 4
 
 
 

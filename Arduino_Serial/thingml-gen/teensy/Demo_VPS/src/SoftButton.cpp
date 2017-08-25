@@ -69,6 +69,22 @@ default: break;
 }
 
 // Event Handlers for incoming messages:
+void SoftButton_handle_Button_release(struct SoftButton_Instance *_instance) {
+if(!(_instance->active)) return;
+//Region SoftButtonImpl
+uint8_t SoftButton_SoftButtonImpl_State_event_consumed = 0;
+if (_instance->SoftButton_SoftButtonImpl_State == SOFTBUTTON_SOFTBUTTONIMPL_PRESSED_STATE) {
+if (SoftButton_SoftButtonImpl_State_event_consumed == 0 && 1) {
+SoftButton_SoftButtonImpl_OnExit(SOFTBUTTON_SOFTBUTTONIMPL_PRESSED_STATE, _instance);
+_instance->SoftButton_SoftButtonImpl_State = SOFTBUTTON_SOFTBUTTONIMPL_RELEASED_STATE;
+SoftButton_SoftButtonImpl_OnEntry(SOFTBUTTON_SOFTBUTTONIMPL_RELEASED_STATE, _instance);
+SoftButton_SoftButtonImpl_State_event_consumed = 1;
+}
+}
+//End Region SoftButtonImpl
+//End dsregion SoftButtonImpl
+//Session list: 
+}
 void SoftButton_handle_Button_press(struct SoftButton_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region SoftButtonImpl
@@ -87,22 +103,6 @@ SoftButton_SoftButtonImpl_OnExit(SOFTBUTTON_SOFTBUTTONIMPL_RELEASED_STATE, _inst
 _instance->SoftButton_SoftButtonImpl_State = SOFTBUTTON_SOFTBUTTONIMPL_IDLE_STATE;
 SoftButton_send_SoftButton_double_click(_instance);
 SoftButton_SoftButtonImpl_OnEntry(SOFTBUTTON_SOFTBUTTONIMPL_IDLE_STATE, _instance);
-SoftButton_SoftButtonImpl_State_event_consumed = 1;
-}
-}
-//End Region SoftButtonImpl
-//End dsregion SoftButtonImpl
-//Session list: 
-}
-void SoftButton_handle_Button_release(struct SoftButton_Instance *_instance) {
-if(!(_instance->active)) return;
-//Region SoftButtonImpl
-uint8_t SoftButton_SoftButtonImpl_State_event_consumed = 0;
-if (_instance->SoftButton_SoftButtonImpl_State == SOFTBUTTON_SOFTBUTTONIMPL_PRESSED_STATE) {
-if (SoftButton_SoftButtonImpl_State_event_consumed == 0 && 1) {
-SoftButton_SoftButtonImpl_OnExit(SOFTBUTTON_SOFTBUTTONIMPL_PRESSED_STATE, _instance);
-_instance->SoftButton_SoftButtonImpl_State = SOFTBUTTON_SOFTBUTTONIMPL_RELEASED_STATE;
-SoftButton_SoftButtonImpl_OnEntry(SOFTBUTTON_SOFTBUTTONIMPL_RELEASED_STATE, _instance);
 SoftButton_SoftButtonImpl_State_event_consumed = 1;
 }
 }

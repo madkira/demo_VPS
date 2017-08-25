@@ -16,10 +16,16 @@
     <messages name="noSignal">
       <annotations name="code" value="2"/>
     </messages>
+    <messages name="calibrating">
+      <annotations name="code" value="3"/>
+    </messages>
+    <messages name="play">
+      <annotations name="code" value="4"/>
+    </messages>
   </types>
-  <types xsi:type="thingML:Thing" name="Demo" includes="//@types.0 //@types.2">
-    <ports xsi:type="thingML:RequiredPort" name="op" receives="//@types.2/@messages.0 //@types.2/@messages.1"/>
-    <ports xsi:type="thingML:ProvidedPort" name="serial1sender" sends="//@types.0/@messages.0 //@types.0/@messages.1"/>
+  <types xsi:type="thingML:Thing" name="Demo" includes="//@types.0 //@types.2 //@types.9 //@types.38">
+    <ports xsi:type="thingML:RequiredPort" name="op" receives="//@types.2/@messages.0 //@types.2/@messages.1 //@types.9/@messages.0 //@types.38/@messages.1"/>
+    <ports xsi:type="thingML:ProvidedPort" name="serial1sender" sends="//@types.0/@messages.0 //@types.0/@messages.1 //@types.0/@messages.2 //@types.0/@messages.3"/>
     <behaviour name="alpha" initial="//@types.1/@behaviour.0/@substate.0">
       <substate name="Idle">
         <internal>
@@ -45,6 +51,14 @@
         <internal>
           <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.2/@messages.1"/>
           <action xsi:type="thingML:SendAction" port="//@types.1/@ports.1" message="//@types.0/@messages.1"/>
+        </internal>
+        <internal>
+          <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.9/@messages.0"/>
+          <action xsi:type="thingML:SendAction" port="//@types.1/@ports.1" message="//@types.0/@messages.2"/>
+        </internal>
+        <internal>
+          <event xsi:type="thingML:ReceiveMessage" name="m" port="//@types.1/@ports.0" message="//@types.38/@messages.1"/>
+          <action xsi:type="thingML:SendAction" port="//@types.1/@ports.1" message="//@types.0/@messages.3"/>
         </internal>
       </substate>
     </behaviour>

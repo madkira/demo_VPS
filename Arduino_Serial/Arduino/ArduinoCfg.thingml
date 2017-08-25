@@ -3,6 +3,8 @@ import "_Datatypes.thingml"
 thing fragment OutputMessage {
     message positionsend(x: UInt32, y: UInt32, z: UInt32) @code "1"
 	message noSignal() @code "2"
+	message calibrating() @code "3"
+	message play() @code "4"
 }
 
 thing Demo includes OutputMessage, TimerMsgs
@@ -35,16 +37,18 @@ uint8_t tar_y;
 
 uint8_t Score = 0;
 
+uint8_t timer = 30;
+
 "
 {
 	
 	required port Output{
-		receives positionsend, noSignal
+		receives positionsend, noSignal, play, calibrating
 	}
 	required port Timer 
     {
 		sends timer_start, timer_cancel
-		receives timer_timeout
+		receives timer_timeout, s1_tic
 	}
 	
 	internal port process
@@ -67,62 +71,91 @@ uint8_t Score = 0;
 			tft.fillScreen(ST7735_BLACK);
 		    tar_x = 64;
 		    tar_y = 64;
+			timer = 30;
 			'
 			
 			end
 			transition -> SetPoint guard '(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE' action Timer!timer_start (0, 30000)
+			transition -> Calibration event m: Output?calibrating
 			internal event m: Output?noSignal action 'tft.fillCircle(cur_x, cur_y, DOT, ST7735_RED);'
 			internal event m: Output?positionsend action '
 				old_x = cur_x;
 				old_y = cur_y;
-				cur_y = int('&m.x&'/1000);
-				cur_x = int('&m.y&'/1000);
+				cur_x = int('&m.x&'/1000);
+				cur_y =128 -  int('&m.y&'/1000);
 				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
 			    tft.setCursor(0, 30);
-		    	tft.setTextColor(ST7735_RED);
+		    	tft.setTextColor(ST7735_YELLOW);
 		    	tft.setTextSize(1);
-		    	tft.println("Reach the center to Start");
+		    	tft.println("   Reach the center");
+		    	tft.println("      to Start");
 			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
 				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
 				'
+		}
+		
+		state Calibration {
+			on entry do
+			'
+			tft.fillScreen(ST7735_BLACK);
+			tft.setCursor(5, 5);
+			    tft.setTextColor(ST7735_YELLOW);
+			    tft.setTextSize(2);
+			    tft.println("Calibration");
+			'
+			end
+			transition -> Idle event m: Output?play
 		}
 		
 		state SetPoint{
 			on entry do
 			'
 			tft.fillScreen(ST7735_BLACK);
+			tft.setCursor(100,0);
+			tft.println(Score);
+			tft.drawRect(1, 1, timer*3, 2, ST7735_RED);
 			old_x = 0;
 			old_y = 0;
 			cur_x = 0;
 			cur_y = 0;
-			tar_x = random(128);
-			tar_y = random(128);
+			tar_x = 5 + random(110);
+			tar_y = 5 + random(110);
 			'
 			end
 			internal event m: Output?positionsend action '
 				old_x = cur_x;
 				old_y = cur_y;
-				cur_y = int('&m.x&'/1000);
-				cur_x = int('&m.y&'/1000);
+				cur_x = int('&m.x&'/1000);
+				cur_y = 128 - int('&m.y&'/1000);
 				tft.fillCircle(old_x, old_y, DOT, ST7735_BLACK);
 			    tft.drawCircle(tar_x, tar_y, CIRCLE, ST7735_YELLOW);
 				tft.fillCircle(cur_x, cur_y, DOT, ST7735_GREEN);
 				'
-			transition -> SetPoint guard '(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE' action 'Score++;'
+			transition -> SetPoint guard '(cur_x - tar_x)*(cur_x - tar_x) + (cur_y - tar_y)*(cur_y - tar_y) < CIRCLE*CIRCLE' action '
+			Score++;
+			tft.setCursor(100,0);
+			tft.println(Score);
+			'
 			internal event m: Output?noSignal action 'tft.fillCircle(cur_x, cur_y, DOT, ST7735_RED);'
 			transition -> GameOver event Timer?timer_timeout
+			internal event m: Timer?s1_tic action '
+			tft.drawRect(1, 1, timer*3, 2, ST7735_BLACK);
+			timer--;
+			tft.drawRect(1, 1, timer*3, 2, ST7735_RED);'
 		}
 		
 		state GameOver {
 			on entry do 
 				'
 				tft.fillScreen(ST7735_BLACK);
-			    tft.setCursor(40, 30);
-			    tft.setTextColor(ST7735_RED);
-			    tft.setTextSize(1);
-			    tft.println("Game Over");
+			    tft.setCursor(30, 5);
 			    tft.setTextColor(ST7735_YELLOW);
-			    tft.setCursor(60, 50);
+			    tft.setTextSize(3);
+			    tft.println("Game\n");
+			    tft.setCursor(30, 35);
+			    tft.println("Over");
+			    tft.setTextColor(ST7735_GREEN);
+			    tft.setCursor(50, 70);
 			    tft.setTextSize(4);
 			    tft.println(Score);
 				'

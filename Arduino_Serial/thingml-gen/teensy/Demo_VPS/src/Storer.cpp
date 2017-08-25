@@ -94,20 +94,6 @@ Storer_EESave_State_event_consumed = 1;
 //End dsregion EESave
 //Session list: 
 }
-void Storer_handle_reader_readByte(struct Storer_Instance *_instance, uint8_t id) {
-if(!(_instance->active)) return;
-//Region EESave
-uint8_t Storer_EESave_State_event_consumed = 0;
-if (_instance->Storer_EESave_State == STORER_EESAVE_IDLE_STATE) {
-if (Storer_EESave_State_event_consumed == 0 && 1) {
-Storer_send_reader_byteRead(_instance, eeprom_read_byte((uint8_t*) id));
-Storer_EESave_State_event_consumed = 1;
-}
-}
-//End Region EESave
-//End dsregion EESave
-//Session list: 
-}
 void Storer_handle_reader_readConfig(struct Storer_Instance *_instance) {
 if(!(_instance->active)) return;
 //Region EESave
@@ -120,6 +106,20 @@ if (Storer_EESave_State_event_consumed == 0 && 1) {
     				ud.b[i] = eeprom_read_byte((uint8_t*) i+1);
     			}
 Storer_send_reader_configRead(_instance, ud.d[0], ud.d[1], ud.d[2], ud.d[3], ud.d[4], ud.d[5], ud.d[6], ud.d[7], ud.d[8], ud.d[9], ud.d[10], ud.d[11]);
+Storer_EESave_State_event_consumed = 1;
+}
+}
+//End Region EESave
+//End dsregion EESave
+//Session list: 
+}
+void Storer_handle_reader_readByte(struct Storer_Instance *_instance, uint8_t id) {
+if(!(_instance->active)) return;
+//Region EESave
+uint8_t Storer_EESave_State_event_consumed = 0;
+if (_instance->Storer_EESave_State == STORER_EESAVE_IDLE_STATE) {
+if (Storer_EESave_State_event_consumed == 0 && 1) {
+Storer_send_reader_byteRead(_instance, eeprom_read_byte((uint8_t*) id));
 Storer_EESave_State_event_consumed = 1;
 }
 }
